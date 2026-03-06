@@ -63,13 +63,13 @@ const EMPTY_VEHICLE: VehicleFormData = {
 // COMPOSANT : LOGIN
 // ══════════════════════════════════════════════════════════════════════════════
 
-function LoginForm({ onLogin }: { onLogin: (pw: string) => void }) {
+function LoginForm({ onLogin, authFailed }: { onLogin: (pw: string) => void; authFailed?: boolean }) {
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(false)
+  const [showPw, setShowPw] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setError(false)
+    if (!password.trim()) return
     onLogin(password)
   }
 
@@ -84,17 +84,39 @@ function LoginForm({ onLogin }: { onLogin: (pw: string) => void }) {
         </div>
 
         <label className="block text-sm font-medium text-[#3D4A66] mb-1.5">Mot de passe</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-[#DDE3F0] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1649C8]/20 focus:border-[#1649C8] mb-4"
-          placeholder="Entrez le mot de passe admin"
-          autoFocus
-        />
+        <div className="relative mb-4">
+          <input
+            type={showPw ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-[#DDE3F0] rounded-lg px-3 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#1649C8]/20 focus:border-[#1649C8]"
+            placeholder="Entrez le mot de passe admin"
+            autoFocus
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw(!showPw)}
+            className="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-[#7D89A3] hover:text-[#080F28] transition-colors rounded-md"
+            aria-label={showPw ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            tabIndex={-1}
+          >
+            {showPw ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+          </button>
+        </div>
 
-        {error && (
-          <p className="text-sm text-red-600 mb-3">Mot de passe incorrect</p>
+        {authFailed && (
+          <p className="text-sm text-red-600 mb-3">Mot de passe incorrect. Réessayez.</p>
         )}
 
         <button
@@ -986,7 +1008,7 @@ export default function AdminPage() {
   // ── Pas connecté ──────────────────────────────────────────────────────────
 
   if (!password) {
-    return <LoginForm onLogin={handleLogin} />
+    return <LoginForm onLogin={handleLogin} authFailed={authError} />
   }
 
   // ── Dashboard ─────────────────────────────────────────────────────────────

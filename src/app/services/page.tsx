@@ -108,36 +108,87 @@ function EngagementSection() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SÉPARATEUR VISUEL ENTRE CATÉGORIES
+// SÉPARATEUR VISUEL ENTRE CATÉGORIES — bannière photo pleine largeur
 // ══════════════════════════════════════════════════════════════════════════════
 
 interface CategoryBannerProps {
   icon: string
   label: string
+  imageSrc?: string
+  /** Fallback gradient when no image is set */
   gradient?: string
   dark?: boolean
 }
 
-function CategoryBanner({ icon, label, gradient, dark }: CategoryBannerProps) {
+function CategoryBanner({ icon, label, imageSrc, gradient, dark }: CategoryBannerProps) {
+  // With image: full photo banner with dark overlay
+  if (imageSrc) {
+    return (
+      <div className="relative h-[160px] md:h-[200px] overflow-hidden">
+        {/* Photo background */}
+        <Image
+          src={imageSrc}
+          alt={label}
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/60 to-ink/40" />
+        {/* Content */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="wrap flex items-center gap-4">
+            <span className="text-3xl md:text-4xl drop-shadow-lg" aria-hidden>{icon}</span>
+            <div>
+              <span className="font-display font-black text-[clamp(1.3rem,3vw,2rem)] uppercase tracking-[0.06em] text-white drop-shadow-md">
+                {label}
+              </span>
+              <div className="w-12 h-[3px] bg-blue rounded-full mt-2" />
+            </div>
+          </div>
+        </div>
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#F8F9FC] to-transparent" />
+      </div>
+    )
+  }
+
+  // Without image: colored placeholder banner ready for future photos
+  const bg = gradient || 'linear-gradient(135deg, #0d1529 0%, #1a2240 40%, #1649C8 100%)'
   return (
     <div
-      className="relative overflow-hidden py-6 md:py-8"
-      style={{
-        background: gradient || 'linear-gradient(135deg, #EAF0FF 0%, #F8F9FC 50%, #EAF0FF 100%)',
-      }}
+      className="relative h-[120px] md:h-[150px] overflow-hidden"
+      style={{ background: bg }}
     >
-      {/* Decorative lines */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent ${dark ? 'via-white/15' : 'via-blue/20'} to-transparent`} />
-        <div className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent ${dark ? 'via-white/15' : 'via-blue/20'} to-transparent`} />
+      {/* Grid pattern overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+        aria-hidden
+      />
+      {/* Decorative circle */}
+      <div
+        className="absolute -right-[5%] -top-[30%] w-[250px] h-[250px] rounded-full pointer-events-none"
+        style={{ background: 'rgba(22,73,200,0.15)' }}
+        aria-hidden
+      />
+      {/* Content */}
+      <div className="absolute inset-0 flex items-center">
+        <div className="wrap flex items-center gap-4">
+          <span className="text-3xl md:text-4xl drop-shadow-lg" aria-hidden>{icon}</span>
+          <div>
+            <span className="font-display font-black text-[clamp(1.3rem,3vw,2rem)] uppercase tracking-[0.06em] text-white drop-shadow-md">
+              {label}
+            </span>
+            <div className="w-12 h-[3px] bg-blue-glow rounded-full mt-2" />
+          </div>
+        </div>
       </div>
-      <div className="wrap flex items-center gap-3">
-        <span className="text-2xl md:text-3xl" aria-hidden>{icon}</span>
-        <span className={`font-display font-black text-[clamp(1rem,2vw,1.3rem)] uppercase tracking-[0.08em] ${dark ? 'text-white/90' : 'text-blue'}`}>
-          {label}
-        </span>
-        <div className={`flex-1 h-px ${dark ? 'bg-white/15' : 'bg-blue/15'} ml-2`} />
-      </div>
+      {/* Bottom fade into page bg */}
+      <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#F8F9FC] to-transparent" />
     </div>
   )
 }
@@ -801,10 +852,11 @@ export default function ServicesPage() {
       <EngagementSection />
       <InclusEntretienBand />
 
-      <CategoryBanner icon="🔧" label="Mécanique & Entretien" />
+      {/* imageSrc — ajouter le chemin de la photo pour chaque catégorie */}
+      <CategoryBanner icon="🔧" label="Mécanique & Entretien" imageSrc="/images/interieur-2.webp" />
       <MecaniqueSection />
 
-      <CategoryBanner icon="🎨" label="Carrosserie & Peinture" />
+      <CategoryBanner icon="🎨" label="Carrosserie & Peinture" imageSrc="/images/interieur-1.webp" />
       <CarrosserieSection />
 
       <CategoryBanner icon="🛞" label="Pneus & Géométrie" />
@@ -821,7 +873,7 @@ export default function ServicesPage() {
 
       <TarifsSection />
 
-      <CategoryBanner icon="🏢" label="Entreprises & Flottes" gradient="linear-gradient(135deg, #0d1529 0%, #1a2240 50%, #0d1529 100%)" dark />
+      <CategoryBanner icon="🏢" label="Entreprises & Flottes" />
       <B2BSection />
 
       <CtaBottom />

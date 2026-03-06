@@ -10,6 +10,7 @@ import { TEAM, GARAGE, phoneLink } from '@/data/contacts'
 // ── Nav items ────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
+  { href: '/',                   label: 'Accueil' },
   { href: '/services',           label: 'Prestations' },
   { href: '/vehicules-occasion', label: "Véhicules d'occasion" },
   { href: '/a-propos',           label: 'À propos' },
@@ -99,7 +100,9 @@ export default function Header() {
           {/* ── Nav desktop ── */}
           <nav className="hidden lg:flex items-center gap-1" aria-label="Navigation principale">
             {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const isActive = item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <Link
                   key={item.href}

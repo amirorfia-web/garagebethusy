@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { IconBandItems } from '@/components/ui/Icons'
 
 // ── Variantes de séparateurs visuels entre sections ──────────────────────────
 
@@ -44,15 +45,12 @@ export function WaveDivider({ className }: DividerProps) {
   )
 }
 
-/** Bande décorative avec icônes auto */
+/** Bande décorative avec icônes auto (lucide-react SVGs) */
 export function AutoIconBand({ className }: DividerProps) {
-  const icons = ['🔧', '🚗', '🛞', '🔩', '🏁', '⚙️', '🔧', '🚗', '🛞', '🔩', '🏁', '⚙️']
   return (
     <div className={cn('overflow-hidden py-6 bg-gradient-to-r from-transparent via-blue-light/50 to-transparent', className)} aria-hidden>
-      <div className="flex animate-ticker whitespace-nowrap">
-        {icons.concat(icons).map((icon, i) => (
-          <span key={i} className="text-xl mx-8 opacity-30 select-none">{icon}</span>
-        ))}
+      <div className="flex animate-ticker whitespace-nowrap items-center">
+        <IconBandItems />
       </div>
     </div>
   )

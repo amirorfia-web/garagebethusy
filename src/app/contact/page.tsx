@@ -1,8 +1,10 @@
+import { MapPin, Phone } from 'lucide-react'
 import type { Metadata } from 'next'
 import Button from '@/components/ui/Button'
 import WhatsAppContact from '@/components/ui/WhatsAppContact'
 import ContactForm from './ContactForm'
 import { GARAGE, TEAM, waLink, phoneLink } from '@/data/contacts'
+import { RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
 export const metadata: Metadata = {
   title: 'Contact — Devis, Rendez-vous & WhatsApp · Lausanne',
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 
 function HeroContact() {
   return (
-    <section className="relative overflow-hidden pt-16 pb-14 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -64,11 +66,11 @@ const HORAIRES = [
 
 function InfosSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
           {/* Colonne gauche : Adresse + Horaires */}
-          <div>
+          <RevealLeft>
             <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
               Informations pratiques
             </p>
@@ -79,7 +81,7 @@ function InfosSection() {
             {/* Adresse */}
             <div className="mb-8">
               <div className="flex items-start gap-3 mb-3">
-                <span className="text-lg" aria-hidden>📍</span>
+                <MapPin size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
                 <div>
                   <p className="text-[0.95rem] font-semibold text-ink">Garage de Béthusy-Beaumont</p>
                   <p className="text-[0.88rem] text-ink-2">Avenue de Béthusy 27 · 1005 Lausanne</p>
@@ -93,7 +95,7 @@ function InfosSection() {
             {/* Téléphone */}
             <div className="mb-8">
               <div className="flex items-start gap-3">
-                <span className="text-lg" aria-hidden>📞</span>
+                <Phone size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
                 <div>
                   <p className="text-[0.95rem] font-semibold text-ink">Téléphone</p>
                   <a
@@ -128,10 +130,10 @@ function InfosSection() {
                 Pour les urgences en dehors des horaires, contactez-nous sur WhatsApp — on fait notre possible.
               </p>
             </div>
-          </div>
+          </RevealLeft>
 
           {/* Colonne droite : Map */}
-          <div>
+          <RevealRight>
             <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-border mb-4">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.8!2d6.643!3d46.523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAvenue+de+B%C3%A9thusy+27%2C+1005+Lausanne!5e0!3m2!1sfr!2sch!4v1700000000000"
@@ -147,7 +149,7 @@ function InfosSection() {
             <Button variant="ghost" as="a" href="https://www.google.com/maps/search/?api=1&query=Avenue+de+Béthusy+27+1005+Lausanne" target="_blank">
               Ouvrir dans Google Maps →
             </Button>
-          </div>
+          </RevealRight>
         </div>
       </div>
     </section>
@@ -160,7 +162,7 @@ function InfosSection() {
 
 function WhatsAppSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       <div className="mb-10 max-w-2xl">
         <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
           WhatsApp
@@ -173,17 +175,18 @@ function WhatsAppSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <StaggerGrid className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {TEAM.map((member) => (
-          <WhatsAppContact
-            key={member.name}
-            name={member.fullName}
-            role={member.role}
-            phone={member.phoneRaw}
-            message={member.waMessage}
-          />
+          <StaggerCard key={member.name}>
+            <WhatsAppContact
+              name={member.fullName}
+              role={member.role}
+              phone={member.phoneRaw}
+              message={member.waMessage}
+            />
+          </StaggerCard>
         ))}
-      </div>
+      </StaggerGrid>
     </section>
   )
 }
@@ -194,7 +197,7 @@ function WhatsAppSection() {
 
 function FormulaireSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="max-w-3xl mx-auto">
           <ContactForm />
@@ -295,7 +298,7 @@ const FAQ_DATA: FaqCategory[] = [
 
 function FaqSection() {
   return (
-    <section className="wrap py-20 md:py-28" id="faq">
+    <section className="wrap py-16 md:py-20" id="faq">
       <div className="max-w-3xl mx-auto">
         <div className="mb-12 text-center">
           <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">

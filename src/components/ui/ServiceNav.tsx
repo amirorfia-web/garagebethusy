@@ -1,15 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ServiceIcon, type IconKey } from '@/components/ui/Icons'
 
-const NAV_ITEMS = [
-  { id: 'mecanique', label: 'Mécanique', icon: '🔧' },
-  { id: 'carrosserie', label: 'Carrosserie', icon: '🎨' },
-  { id: 'pneus', label: 'Pneus', icon: '🛞' },
-  { id: 'vitrage', label: 'Vitrage', icon: '🪟' },
-  { id: 'gardiennage', label: 'Gardiennage', icon: '📦' },
-  { id: 'panne', label: 'Panne', icon: '📞' },
-  { id: 'entreprises', label: 'Entreprises', icon: '🏢' },
+const NAV_ITEMS: { id: string; label: string; icon: IconKey }[] = [
+  { id: 'mecanique', label: 'Mécanique', icon: 'mecanique' },
+  { id: 'carrosserie', label: 'Carrosserie', icon: 'carrosserie' },
+  { id: 'pneus', label: 'Pneus', icon: 'pneus' },
+  { id: 'vitrage', label: 'Vitrage', icon: 'vitrage' },
+  { id: 'gardiennage', label: 'Gardiennage', icon: 'gardiennage' },
+  { id: 'panne', label: 'Panne', icon: 'panne' },
+  { id: 'entreprises', label: 'Entreprises', icon: 'entreprises' },
 ]
 
 export default function ServiceNav() {
@@ -78,7 +79,11 @@ export default function ServiceNav() {
                   : 'text-ink-2 hover:bg-blue-light hover:text-blue'
               }`}
             >
-              <span className="text-sm" aria-hidden>{item.icon}</span>
+              <ServiceIcon
+                name={item.icon}
+                variant="sm"
+                className={activeId === item.id ? 'text-white' : 'text-blue'}
+              />
               {item.label}
             </button>
           ))}

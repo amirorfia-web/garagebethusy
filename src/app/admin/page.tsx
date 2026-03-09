@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { CarFront } from 'lucide-react'
 import type { Vehicle } from '@/data/vehicle-types'
 import { BADGE_OPTIONS, FUEL_OPTIONS, TRANSMISSION_OPTIONS } from '@/data/vehicle-types'
 
@@ -1088,7 +1089,7 @@ export default function AdminPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={v.images?.[0] || v.image!} alt={`${v.make} ${v.model}`} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-2xl">🚗</span>
+                    <CarFront size={28} className="text-blue/40" strokeWidth={1.5} />
                   )}
                 </div>
 

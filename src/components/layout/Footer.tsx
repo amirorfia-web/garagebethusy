@@ -33,6 +33,8 @@ function PhoneSmall() {
 export default function Footer() {
   return (
     <footer className="bg-ink text-white/80">
+      {/* Blue top accent line */}
+      <div className="h-1 bg-gradient-to-r from-blue via-blue-mid to-blue" />
 
       {/* ── Grille principale ── */}
       <div className="wrap py-16">

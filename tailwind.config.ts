@@ -128,11 +128,17 @@ const config: Config = {
           '0%, 100%': { opacity: '1',  transform: 'scale(1)' },
           '50%':       { opacity: '0.6', transform: 'scale(0.85)' },
         },
+        'wa-pulse': {
+          '0%':   { transform: 'scale(1)',   opacity: '0.5' },
+          '70%':  { transform: 'scale(1.5)', opacity: '0' },
+          '100%': { transform: 'scale(1.5)', opacity: '0' },
+        },
       },
       animation: {
         'fade-up':  'fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both',
         ticker:     'ticker 22s linear infinite',
         blink:      'blink 2s infinite',
+        'wa-pulse': 'wa-pulse 2s ease-out infinite',
       },
 
       // ── MAX-WIDTH ────────────────────────────────────────────────────────────

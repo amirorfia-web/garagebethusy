@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import ServiceNav from '@/components/ui/ServiceNav'
 import { TEAM, GARAGE, waLink, phoneLink } from '@/data/contacts'
+import { Wrench, Paintbrush, CircleDot, Shield, Warehouse, PhoneCall, Building2, CarFront, Sparkles, Smartphone } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Nos prestations — Mécanique, Carrosserie, Pneus & Vitrage · Lausanne',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 
 function HeroServices() {
   return (
-    <section className="relative overflow-hidden pt-16 pb-14 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
       {/* Bande bleue subtile en fond */}
       <div
         className="absolute inset-0 z-0"
@@ -52,11 +53,11 @@ function HeroServices() {
           {/* Badges info */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="inline-flex items-center gap-2 text-[0.8rem] text-ink-2 bg-white border border-border rounded-md px-4 py-2.5 shadow-xs">
-              <span aria-hidden>🚗</span>
+              <CarFront size={18} className="text-blue shrink-0" strokeWidth={1.8} />
               Véhicule de courtoisie disponible pendant votre réparation.
             </div>
             <div className="inline-flex items-center gap-2 text-[0.8rem] text-ink-2 bg-white border border-border rounded-md px-4 py-2.5 shadow-xs">
-              <span aria-hidden>🏢</span>
+              <Building2 size={18} className="text-blue shrink-0" strokeWidth={1.8} />
               Ouvert aux entreprises — flottes, devis dédiés.
             </div>
           </div>
@@ -112,7 +113,7 @@ function EngagementSection() {
 // ══════════════════════════════════════════════════════════════════════════════
 
 interface CategoryBannerProps {
-  icon: string
+  icon: React.ReactNode
   label: string
   imageSrc?: string
   /** Fallback gradient when no image is set */
@@ -138,7 +139,7 @@ function CategoryBanner({ icon, label, imageSrc, gradient, dark }: CategoryBanne
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
           <div className="wrap flex items-center gap-4">
-            <span className="text-3xl md:text-4xl drop-shadow-lg" aria-hidden>{icon}</span>
+            <span className="drop-shadow-lg" aria-hidden>{icon}</span>
             <div>
               <span className="font-display font-black text-[clamp(1.3rem,3vw,2rem)] uppercase tracking-[0.06em] text-white drop-shadow-md">
                 {label}
@@ -178,7 +179,7 @@ function CategoryBanner({ icon, label, imageSrc, gradient, dark }: CategoryBanne
       {/* Content */}
       <div className="absolute inset-0 flex items-center">
         <div className="wrap flex items-center gap-4">
-          <span className="text-3xl md:text-4xl drop-shadow-lg" aria-hidden>{icon}</span>
+          <span className="drop-shadow-lg" aria-hidden>{icon}</span>
           <div>
             <span className="font-display font-black text-[clamp(1.3rem,3vw,2rem)] uppercase tracking-[0.06em] text-white drop-shadow-md">
               {label}
@@ -205,7 +206,7 @@ interface ServiceItemProps {
 
 function ServiceItem({ title, description, price }: ServiceItemProps) {
   return (
-    <div className="bg-white border border-border rounded-lg p-5 shadow-xs hover:shadow-sm hover:border-blue/20 transition-all duration-200">
+    <div className="bg-white border border-border border-t-2 border-t-blue/20 rounded-lg p-5 shadow-xs hover:shadow-sm hover:border-blue/20 transition-all duration-200">
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <h4 className="font-display font-bold text-[0.95rem] uppercase tracking-[0.03em] text-ink leading-tight">
           {title}
@@ -266,7 +267,7 @@ function DetailList({ items }: DetailListProps) {
 
 interface ServiceSectionHeaderProps {
   number: string
-  icon: string
+  icon: React.ReactNode
   tag: string
   title: string
   chapeau: string
@@ -286,7 +287,7 @@ function ServiceSectionHeader({ number, icon, tag, title, chapeau }: ServiceSect
 
       {/* Tag */}
       <p className="text-[0.68rem] font-bold tracking-[0.15em] uppercase text-blue mb-2 relative z-[1]">
-        <span aria-hidden className="mr-1.5">{icon}</span>
+        <span aria-hidden className="mr-1.5 inline-flex align-middle">{icon}</span>
         {tag}
       </p>
 
@@ -314,8 +315,8 @@ function InclusEntretienBand() {
   return (
     <section className="wrap py-10 md:py-14">
       <div className="bg-gradient-to-r from-blue-light to-blue-glow border border-blue/15 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5">
-        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center text-3xl shadow-xs shrink-0">
-          ✨
+        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center shadow-xs shrink-0">
+          <Sparkles size={32} className="text-blue" strokeWidth={1.8} />
         </div>
         <div className="flex-1">
           <h3 className="font-display font-bold text-[1.15rem] uppercase tracking-[0.03em] text-ink mb-1">
@@ -365,10 +366,10 @@ const MECANIQUE_DETAILS = [
 
 function MecaniqueSection() {
   return (
-    <section className="wrap py-20 md:py-28" id="mecanique">
+    <section className="wrap py-16 md:py-20" id="mecanique">
       <ServiceSectionHeader
         number="01"
-        icon="🔧"
+        icon={<Wrench size={18} className="text-blue" strokeWidth={1.8} />}
         tag="Mécanique & Entretien"
         title="L'entretien, c'est notre cœur de métier."
         chapeau="L'entretien régulier est le meilleur investissement que vous puissiez faire pour votre véhicule. On s'occupe de l'essentiel — avec rigueur, et sans vous faire remplacer ce qui n'en a pas besoin."
@@ -457,11 +458,11 @@ const CARROSSERIE_DETAILS = [
 
 function CarrosserieSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28" id="carrosserie">
+    <section className="bg-white border-y border-border py-16 md:py-20" id="carrosserie">
       <div className="wrap">
         <ServiceSectionHeader
           number="02"
-          icon="🎨"
+          icon={<Paintbrush size={18} className="text-blue" strokeWidth={1.8} />}
           tag="Carrosserie & Peinture"
           title="Un résultat invisible, c'est le meilleur résultat."
           chapeau="Un choc, une rayure, une déformation — ça arrive. Ce qui compte, c'est le résultat final. Notre atelier carrosserie travaille à la teinte exacte de votre véhicule, pour un rendu invisible."
@@ -525,10 +526,10 @@ const PNEUS_DETAILS = [
 
 function PneusSection() {
   return (
-    <section className="wrap py-20 md:py-28" id="pneus">
+    <section className="wrap py-16 md:py-20" id="pneus">
       <ServiceSectionHeader
         number="03"
-        icon="🛞"
+        icon={<CircleDot size={18} className="text-blue" strokeWidth={1.8} />}
         tag="Pneus & Géométrie"
         title="La base de votre sécurité — au sol."
         chapeau="Des pneus en bon état et une géométrie correcte — c'est la base de la sécurité routière, et l'une des meilleures façons de préserver vos freins et votre direction."
@@ -588,11 +589,11 @@ const VITRAGE_DETAILS = [
 
 function VitrageSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28" id="vitrage">
+    <section className="bg-white border-y border-border py-16 md:py-20" id="vitrage">
       <div className="wrap">
         <ServiceSectionHeader
           number="04"
-          icon="🪟"
+          icon={<Shield size={18} className="text-blue" strokeWidth={1.8} />}
           tag="Pare-brise & Vitrage"
           title="Sécurité et visibilité, sans compromis."
           chapeau="Un pare-brise fissuré ou un vitrage cassé, c'est un problème de sécurité — et souvent pris en charge par l'assurance. On intervient rapidement, avec des vitres adaptées à votre modèle."
@@ -638,11 +639,11 @@ function VitrageSection() {
 
 function GardiennageSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28" id="gardiennage">
+    <section className="bg-white border-y border-border py-16 md:py-20" id="gardiennage">
       <div className="wrap">
         <ServiceSectionHeader
           number="06"
-          icon="📦"
+          icon={<Warehouse size={18} className="text-blue" strokeWidth={1.8} />}
           tag="Gardiennage & Stockage"
           title="On prend soin de ce que vous nous confiez."
           chapeau="Changement de saison, séjour prolongé, véhicule de collection — on prend soin de ce que vous nous confiez."
@@ -675,18 +676,18 @@ function GardiennageSection() {
 
 function PanneSection() {
   return (
-    <section className="wrap py-20 md:py-28" id="panne">
+    <section className="wrap py-16 md:py-20" id="panne">
       <ServiceSectionHeader
         number="07"
-        icon="📞"
+        icon={<PhoneCall size={18} className="text-blue" strokeWidth={1.8} />}
         tag="En cas de panne"
         title="Un problème ? Appelez-nous."
         chapeau="Vous êtes en panne à Lausanne ou dans les environs ? Appelez-nous directement — on vous conseille par téléphone et on organise la suite ensemble : diagnostic, prise en charge au garage, ou orientation vers le bon interlocuteur."
       />
 
       <div className="bg-blue-light border border-blue/15 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5 mb-6">
-        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center text-3xl shadow-xs shrink-0">
-          📱
+        <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center shadow-xs shrink-0">
+          <Smartphone size={32} className="text-blue" strokeWidth={1.8} />
         </div>
         <div className="flex-1">
           <h3 className="font-display font-bold text-[1.1rem] uppercase tracking-[0.03em] text-ink mb-1">
@@ -776,7 +777,7 @@ function TarifsSection() {
 
 function B2BSection() {
   return (
-    <section className="wrap py-20 md:py-28" id="entreprises">
+    <section className="wrap py-16 md:py-20" id="entreprises">
       <div className="bg-gradient-to-br from-ink to-[#1a2240] rounded-2xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
         {/* Cercle décoratif */}
         <div
@@ -853,27 +854,27 @@ export default function ServicesPage() {
       <InclusEntretienBand />
 
       {/* imageSrc — ajouter le chemin de la photo pour chaque catégorie */}
-      <CategoryBanner icon="🔧" label="Mécanique & Entretien" imageSrc="/images/interieur-2.webp" />
+      <CategoryBanner icon={<Wrench size={36} className="text-white" strokeWidth={1.8} />} label="Mécanique & Entretien" imageSrc="/images/interieur-2.webp" />
       <MecaniqueSection />
 
-      <CategoryBanner icon="🎨" label="Carrosserie & Peinture" imageSrc="/images/interieur-1.webp" />
+      <CategoryBanner icon={<Paintbrush size={36} className="text-white" strokeWidth={1.8} />} label="Carrosserie & Peinture" imageSrc="/images/interieur-1.webp" />
       <CarrosserieSection />
 
-      <CategoryBanner icon="🛞" label="Pneus & Géométrie" />
+      <CategoryBanner icon={<CircleDot size={36} className="text-white" strokeWidth={1.8} />} label="Pneus & Géométrie" imageSrc="/images/banner-pneus.webp" />
       <PneusSection />
 
-      <CategoryBanner icon="🪟" label="Pare-brise & Vitrage" />
+      <CategoryBanner icon={<Shield size={36} className="text-white" strokeWidth={1.8} />} label="Pare-brise & Vitrage" imageSrc="/images/banner-vitrage.webp" />
       <VitrageSection />
 
-      <CategoryBanner icon="📦" label="Gardiennage & Stockage" />
+      <CategoryBanner icon={<Warehouse size={36} className="text-white" strokeWidth={1.8} />} label="Gardiennage & Stockage" imageSrc="/images/banner-gardiennage.webp" />
       <GardiennageSection />
 
-      <CategoryBanner icon="📞" label="En cas de panne" />
+      <CategoryBanner icon={<PhoneCall size={36} className="text-white" strokeWidth={1.8} />} label="En cas de panne" imageSrc="/images/banner-panne.webp" />
       <PanneSection />
 
       <TarifsSection />
 
-      <CategoryBanner icon="🏢" label="Entreprises & Flottes" />
+      <CategoryBanner icon={<Building2 size={36} className="text-white" strokeWidth={1.8} />} label="Entreprises & Flottes" imageSrc="/images/banner-entreprises.webp" />
       <B2BSection />
 
       <CtaBottom />

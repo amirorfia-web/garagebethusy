@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Search, ClipboardList, Handshake, Wrench } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import VehicleCard from '@/components/ui/VehicleCard'
@@ -7,6 +8,7 @@ import type { Vehicle } from '@/data/vehicle-types'
 import vehiclesData from '@/data/vehicles.json'
 import { TEAM, GARAGE, waLink, phoneLink, waVehicleLink, emailVehicleLink } from '@/data/contacts'
 import { TripleDot } from '@/components/ui/SectionDivider'
+import { StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
 export const metadata: Metadata = {
   title: 'Véhicules d\'occasion — Achat & Vente · Lausanne',
@@ -23,7 +25,7 @@ const VEHICLES = (vehiclesData as Vehicle[]).filter((v) => v.visible)
 
 function HeroVehicules() {
   return (
-    <section className="relative overflow-hidden pt-16 pb-14 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -72,7 +74,7 @@ function HeroVehicules() {
 
 function VehiculesGrid() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
@@ -135,22 +137,22 @@ function VehiculesGrid() {
 
 const APPROCHE = [
   {
-    icon: '🔍',
+    icon: <Search size={22} className="text-blue" strokeWidth={1.8} />,
     title: 'Véhicules inspectés',
     text: 'Chaque véhicule passe par notre atelier avant d\'être mis en vente. Contrôle mécanique, vérification du train roulant, diagnostic électronique.',
   },
   {
-    icon: '📋',
+    icon: <ClipboardList size={22} className="text-blue" strokeWidth={1.8} />,
     title: 'Historique transparent',
     text: 'On vous dit tout : kilométrage vérifié, historique d\'entretien, éventuels défauts cosmétiques. Pas de mauvaises surprises après l\'achat.',
   },
   {
-    icon: '🤝',
+    icon: <Handshake size={22} className="text-blue" strokeWidth={1.8} />,
     title: 'Prix ferme, sans négociation à l\'envers',
     text: 'Le prix affiché est le bon prix. Il tient compte de l\'état réel du véhicule et du marché. On ne gonfle pas pour laisser « négocier ».',
   },
   {
-    icon: '🔧',
+    icon: <Wrench size={22} className="text-blue" strokeWidth={1.8} />,
     title: 'Garantie atelier',
     text: 'Vous achetez chez un garage, pas chez un revendeur. Si un problème apparaît, vous savez exactement où revenir — et on s\'en occupe.',
   },
@@ -158,7 +160,7 @@ const APPROCHE = [
 
 function ApprocheSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       <div className="mb-12 max-w-2xl">
         <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
           Notre approche
@@ -171,24 +173,23 @@ function ApprocheSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {APPROCHE.map((item) => (
-          <div
-            key={item.title}
-            className="bg-white border border-border rounded-xl p-6 hover:border-blue/20 hover:shadow-sm transition-all duration-200"
-          >
-            <div className="w-11 h-11 bg-blue-light rounded-lg flex items-center justify-center text-xl mb-4">
-              {item.icon}
+          <StaggerCard key={item.title}>
+            <div className="bg-white border border-border rounded-xl p-6 hover:border-blue/20 hover:shadow-sm transition-all duration-200">
+              <div className="w-11 h-11 bg-blue-light rounded-lg flex items-center justify-center mb-4">
+                {item.icon}
+              </div>
+              <h3 className="font-display font-bold text-[0.95rem] uppercase tracking-[0.03em] text-ink leading-tight mb-2">
+                {item.title}
+              </h3>
+              <p className="text-[0.82rem] text-ink-2 leading-[1.6]">
+                {item.text}
+              </p>
             </div>
-            <h3 className="font-display font-bold text-[0.95rem] uppercase tracking-[0.03em] text-ink leading-tight mb-2">
-              {item.title}
-            </h3>
-            <p className="text-[0.82rem] text-ink-2 leading-[1.6]">
-              {item.text}
-            </p>
-          </div>
+          </StaggerCard>
         ))}
-      </div>
+      </StaggerGrid>
     </section>
   )
 }
@@ -199,7 +200,7 @@ function ApprocheSection() {
 
 function VenteSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="bg-gradient-to-br from-ink to-[#1a2240] rounded-2xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
           {/* Cercle décoratif */}

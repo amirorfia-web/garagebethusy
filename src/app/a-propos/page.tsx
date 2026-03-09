@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import { Handshake, Timer, Wrench, MapPin, ParkingSquare, Bus } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import StatStrip from '@/components/ui/StatStrip'
 import WhatsAppContact from '@/components/ui/WhatsAppContact'
 import { TEAM as TEAM_CONTACTS, waLink } from '@/data/contacts'
+import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
 export const metadata: Metadata = {
   title: 'À propos — Garage indépendant à Lausanne depuis 2006 · AFGP Sàrl',
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 
 function HeroAPropos() {
   return (
-    <section className="relative overflow-hidden pt-16 pb-14 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
       {/* Fond dégradé subtil */}
       <div
         className="absolute inset-0 z-0"
@@ -75,22 +77,24 @@ function HeroAPropos() {
 
 function HistoireSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
           {/* Image */}
-          <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
-            <Image
-              src="/images/interieur-1.webp"
-              alt="L'atelier du Garage de Béthusy-Beaumont — vue intérieure"
-              fill
-              className="object-cover"
-              sizes="(min-width: 768px) 50vw, 100vw"
-            />
-          </div>
+          <RevealLeft>
+            <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
+              <Image
+                src="/images/interieur-1.webp"
+                alt="L'atelier du Garage de Béthusy-Beaumont — vue intérieure"
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 50vw, 100vw"
+              />
+            </div>
+          </RevealLeft>
 
           {/* Texte */}
-          <div>
+          <RevealRight>
             <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
               Depuis 2006
             </p>
@@ -111,7 +115,7 @@ function HistoireSection() {
                 C&apos;est ce qui a construit la fidélité de notre clientèle. Et c&apos;est ce qui la maintient.
               </p>
             </div>
-          </div>
+          </RevealRight>
         </div>
 
         {/* StatStrip */}
@@ -222,7 +226,7 @@ function TeamMember({ name, role, description, phone, waMessage, imageSrc, image
 
 function EquipeSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       <div className="mb-12 max-w-2xl">
         <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
           L&apos;équipe
@@ -235,11 +239,13 @@ function EquipeSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+      <StaggerGrid className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {TEAM.map((member) => (
-          <TeamMember key={member.name} {...member} />
+          <StaggerCard key={member.name}>
+            <TeamMember {...member} />
+          </StaggerCard>
         ))}
-      </div>
+      </StaggerGrid>
     </section>
   )
 }
@@ -250,17 +256,17 @@ function EquipeSection() {
 
 const VALEURS = [
   {
-    icon: '🤝',
+    icon: <Handshake size={24} className="text-blue" strokeWidth={1.8} />,
     title: 'Ce qu\'on dit, on le fait.',
     text: 'Devis ferme avant intervention. Prix facturé = prix annoncé. Si quelque chose change, vous êtes informé avant — pas après.',
   },
   {
-    icon: '⏱',
+    icon: <Timer size={24} className="text-blue" strokeWidth={1.8} />,
     title: 'Votre temps a de la valeur.',
     text: 'Délais tenus, réponses dans la journée, voiture rendue à l\'heure prévue. On sait que vous n\'avez pas que ça à gérer.',
   },
   {
-    icon: '🔧',
+    icon: <Wrench size={24} className="text-blue" strokeWidth={1.8} />,
     title: 'Vingt ans de métier, pas de raccourcis.',
     text: 'Aucun diagnostic à la va-vite, aucune pièce remplacée sans raison. On travaille avec méthode — parce que c\'est comme ça qu\'on évite les retours au garage.',
   },
@@ -268,7 +274,7 @@ const VALEURS = [
 
 function ValeursSection() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="mb-12 max-w-2xl">
           <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
@@ -279,26 +285,25 @@ function ValeursSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <StaggerGrid className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {VALEURS.map((v) => (
-            <div
-              key={v.title}
-              className="relative bg-bg-app border border-border rounded-xl p-7 hover:border-blue/20 hover:shadow-sm transition-all duration-200"
-            >
-              {/* Icône */}
-              <div className="w-12 h-12 bg-blue-light rounded-lg flex items-center justify-center text-2xl mb-5">
-                {v.icon}
-              </div>
+            <StaggerCard key={v.title}>
+              <div className="relative bg-bg-app border border-border rounded-xl p-7 hover:border-blue/20 hover:shadow-sm transition-all duration-200">
+                {/* Icône */}
+                <div className="w-12 h-12 bg-blue-light rounded-lg flex items-center justify-center mb-5">
+                  {v.icon}
+                </div>
 
-              <h3 className="font-display font-bold text-[1.05rem] uppercase tracking-[0.03em] text-ink leading-tight mb-3">
-                {v.title}
-              </h3>
-              <p className="text-[0.84rem] text-ink-2 leading-[1.65]">
-                {v.text}
-              </p>
-            </div>
+                <h3 className="font-display font-bold text-[1.05rem] uppercase tracking-[0.03em] text-ink leading-tight mb-3">
+                  {v.title}
+                </h3>
+                <p className="text-[0.84rem] text-ink-2 leading-[1.65]">
+                  {v.text}
+                </p>
+              </div>
+            </StaggerCard>
           ))}
-        </div>
+        </StaggerGrid>
       </div>
     </section>
   )
@@ -310,10 +315,10 @@ function ValeursSection() {
 
 function GarageSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
         {/* Texte */}
-        <div>
+        <RevealLeft>
           <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
             Le garage
           </p>
@@ -332,24 +337,25 @@ function GarageSection() {
           {/* Infos pratiques */}
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <span className="text-lg" aria-hidden>📍</span>
+              <MapPin size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
               <div>
                 <p className="text-[0.88rem] font-semibold text-ink">Garage de Béthusy-Beaumont</p>
                 <p className="text-[0.82rem] text-ink-2">Avenue de Béthusy 27 · 1005 Lausanne</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-lg" aria-hidden>🅿️</span>
+              <ParkingSquare size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
               <p className="text-[0.82rem] text-ink-2">Parking gratuit sur place</p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-lg" aria-hidden>🚌</span>
+              <Bus size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
               <p className="text-[0.82rem] text-ink-2">Accessible en transports publics</p>
             </div>
           </div>
-        </div>
+        </RevealLeft>
 
         {/* Google Maps */}
+        <RevealRight>
         <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-border">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.8!2d6.643!3d46.523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAvenue+de+B%C3%A9thusy+27%2C+1005+Lausanne!5e0!3m2!1sfr!2sch!4v1700000000000"
@@ -362,6 +368,7 @@ function GarageSection() {
             title="Localisation du Garage de Béthusy-Beaumont — Avenue de Béthusy 27, 1005 Lausanne"
           />
         </div>
+        </RevealRight>
       </div>
     </section>
   )

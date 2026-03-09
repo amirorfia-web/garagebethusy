@@ -1,16 +1,19 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Wrench, ClipboardList, CarFront, MapPin, Star, Paintbrush, Cog } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Card from '@/components/ui/Card'
 import VehicleCard from '@/components/ui/VehicleCard'
 import StatStrip from '@/components/ui/StatStrip'
 import BackgroundPaths from '@/components/ui/BackgroundPaths'
+import { StarRating } from '@/components/ui/Icons'
 import type { Vehicle } from '@/data/vehicle-types'
 import vehiclesData from '@/data/vehicles.json'
 import { TEAM, GARAGE, waLink, phoneLink } from '@/data/contacts'
 import { TrustBand } from '@/components/ui/SectionDivider'
+import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
 // 3 premiers véhicules visibles pour l'aperçu
 const PREVIEW_VEHICLES = (vehiclesData as Vehicle[]).filter((v) => v.visible).slice(0, 3)
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-16 pb-14 md:pt-24 md:pb-20">
+    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
       {/* Diagonal blue slab (desktop) */}
       <div
         className="hidden md:block absolute top-0 right-[-5%] w-[52%] h-full z-0"
@@ -83,7 +86,7 @@ function HeroSection() {
 
             {/* Badge confiance */}
             <div className="flex items-center gap-2 text-[0.78rem] text-ink-3">
-              <span className="text-warn">⭐</span>
+              <Star size={14} className="text-warn" fill="currentColor" strokeWidth={0} />
               Avis clients vérifiés · Google My Business
             </div>
           </div>
@@ -112,29 +115,31 @@ function HeroSection() {
 // ══════════════════════════════════════════════════════════════════════════════
 
 const REASSURANCE = [
-  { icon: '🔧', title: 'Toutes marques',         desc: 'Voitures de toutes origines et toutes marques.' },
-  { icon: '📋', title: 'Devis transparent',       desc: 'Prix annoncé = prix facturé. Pas de mauvaises surprises.' },
-  { icon: '🚗', title: 'Véhicule de courtoisie',  desc: 'Un véhicule de prêt disponible pendant la durée de votre réparation.' },
-  { icon: '📍', title: 'Parking gratuit',         desc: 'Entrée de ville, accès facile, places disponibles sur place.' },
+  { icon: <Wrench size={24} className="text-blue" strokeWidth={1.8} />,        title: 'Toutes marques',         desc: 'Voitures de toutes origines et toutes marques.' },
+  { icon: <ClipboardList size={24} className="text-blue" strokeWidth={1.8} />, title: 'Devis transparent',       desc: 'Prix annoncé = prix facturé. Pas de mauvaises surprises.' },
+  { icon: <CarFront size={24} className="text-blue" strokeWidth={1.8} />,      title: 'Véhicule de courtoisie',  desc: 'Un véhicule de prêt disponible pendant la durée de votre réparation.' },
+  { icon: <MapPin size={24} className="text-blue" strokeWidth={1.8} />,        title: 'Parking gratuit',         desc: 'Entrée de ville, accès facile, places disponibles sur place.' },
 ]
 
 function ReassuranceStrip() {
   return (
     <section className="bg-white border-y border-border py-10 md:py-12">
       <div className="wrap">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <StaggerGrid className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {REASSURANCE.map((item) => (
-            <div key={item.title} className="flex flex-col gap-2">
-              <span className="text-2xl" aria-hidden>{item.icon}</span>
-              <h3 className="font-display font-bold text-[1rem] uppercase tracking-[0.03em] text-ink">
-                {item.title}
-              </h3>
-              <p className="text-[0.82rem] text-ink-2 leading-[1.55]">
-                {item.desc}
-              </p>
-            </div>
+            <StaggerCard key={item.title}>
+              <div className="flex flex-col gap-2">
+                <span aria-hidden>{item.icon}</span>
+                <h3 className="font-display font-bold text-[1rem] uppercase tracking-[0.03em] text-ink">
+                  {item.title}
+                </h3>
+                <p className="text-[0.82rem] text-ink-2 leading-[1.55]">
+                  {item.desc}
+                </p>
+              </div>
+            </StaggerCard>
           ))}
-        </div>
+        </StaggerGrid>
       </div>
     </section>
   )
@@ -146,10 +151,10 @@ function ReassuranceStrip() {
 
 function IntroSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center mb-14">
         {/* Texte */}
-        <div>
+        <RevealLeft>
           <h2 className="font-display font-black text-h2 uppercase text-ink mb-6 leading-none">
             Un garage lausannois qui ne fait pas de promesses en l&apos;air.
           </h2>
@@ -164,18 +169,20 @@ function IntroSection() {
               Pas de jargon inutile. Pas de surprises sur la facture. Un interlocuteur direct, joignable, qui vous connaît.
             </p>
           </div>
-        </div>
+        </RevealLeft>
 
         {/* Image */}
-        <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
-          <Image
-            src="/images/interieur-2.webp"
-            alt="Intérieur de l'atelier — véhicules en cours de réparation"
-            fill
-            className="object-cover"
-            sizes="(min-width: 768px) 50vw, 100vw"
-          />
-        </div>
+        <RevealRight>
+          <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
+            <Image
+              src="/images/interieur-2.webp"
+              alt="Intérieur de l'atelier — véhicules en cours de réparation"
+              fill
+              className="object-cover"
+              sizes="(min-width: 768px) 50vw, 100vw"
+            />
+          </div>
+        </RevealRight>
       </div>
 
       {/* Stat strip */}
@@ -197,7 +204,7 @@ function IntroSection() {
 
 function ServicesPreview() {
   return (
-    <section className="bg-white border-y border-border py-20 md:py-28">
+    <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         {/* En-tête */}
         <div className="mb-12 max-w-2xl">
@@ -213,32 +220,38 @@ function ServicesPreview() {
         </div>
 
         {/* Cards */}
-        <div className="card-grid-3 mb-10">
-          <Card
-            icon="🔧"
-            title="Mécanique & Entretien"
-            description="Révision, freins, distribution, embrayage, diagnostic électronique. On intervient sur tous les systèmes — avec les bons outils et l'expérience qui va avec."
-            badge={{ variant: 'grey', children: 'Toutes marques' }}
-            ctaLabel="Voir les prestations →"
-            href="/services"
-          />
-          <Card
-            icon="🎨"
-            title="Carrosserie & Peinture"
-            description="Chocs, rayures, déformations — on remet votre carrosserie dans son état d'origine. Peinture teintée en atelier, résultat garanti."
-            badge={{ variant: 'blue', children: 'Devis gratuit' }}
-            ctaLabel="Voir les prestations →"
-            href="/services"
-          />
-          <Card
-            icon="⚙️"
-            title="Pneus, Vitrage & Plus"
-            description="Montage dès CHF 25.–/pneu, géométrie, pare-brise, gardiennage saisonnier. Tout ce qu'il faut pour rouler en sécurité."
-            badge={{ variant: 'success', dot: true, children: 'Disponible' }}
-            ctaLabel="Voir les prestations →"
-            href="/services"
-          />
-        </div>
+        <StaggerGrid className="card-grid-3 mb-10">
+          <StaggerCard>
+            <Card
+              icon={<Wrench size={24} className="text-blue" strokeWidth={1.8} />}
+              title="Mécanique & Entretien"
+              description="Révision, freins, distribution, embrayage, diagnostic électronique. On intervient sur tous les systèmes — avec les bons outils et l'expérience qui va avec."
+              badge={{ variant: 'grey', children: 'Toutes marques' }}
+              ctaLabel="Voir les prestations →"
+              href="/services"
+            />
+          </StaggerCard>
+          <StaggerCard>
+            <Card
+              icon={<Paintbrush size={24} className="text-blue" strokeWidth={1.8} />}
+              title="Carrosserie & Peinture"
+              description="Chocs, rayures, déformations — on remet votre carrosserie dans son état d'origine. Peinture teintée en atelier, résultat garanti."
+              badge={{ variant: 'blue', children: 'Devis gratuit' }}
+              ctaLabel="Voir les prestations →"
+              href="/services"
+            />
+          </StaggerCard>
+          <StaggerCard>
+            <Card
+              icon={<Cog size={24} className="text-blue" strokeWidth={1.8} />}
+              title="Pneus, Vitrage & Plus"
+              description="Montage dès CHF 25.–/pneu, géométrie, pare-brise, gardiennage saisonnier. Tout ce qu'il faut pour rouler en sécurité."
+              badge={{ variant: 'success', dot: true, children: 'Disponible' }}
+              ctaLabel="Voir les prestations →"
+              href="/services"
+            />
+          </StaggerCard>
+        </StaggerGrid>
 
         <div className="text-center">
           <Button variant="ghost" as="a" href="/services">
@@ -271,7 +284,7 @@ const TESTIMONIALS = [
 
 function TestimonialsSection() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       {/* En-tête */}
       <div className="mb-12 max-w-2xl">
         <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
@@ -286,25 +299,24 @@ function TestimonialsSection() {
       </div>
 
       {/* Grille témoignages */}
-      <div className="card-grid-3 mb-10">
+      <StaggerGrid className="card-grid-3 mb-10">
         {TESTIMONIALS.map((t, i) => (
-          <blockquote
-            key={i}
-            className="bg-white border border-border rounded-lg p-6 shadow-sm flex flex-col"
-          >
-            {/* Étoiles */}
-            <div className="flex gap-0.5 mb-4 text-warn text-sm" aria-label="5 étoiles sur 5">
-              {'⭐⭐⭐⭐⭐'}
-            </div>
-            <p className="text-[0.88rem] text-ink leading-[1.6] italic flex-1 mb-4">
-              &ldquo;{t.quote}&rdquo;
-            </p>
-            <footer className="text-[0.72rem] font-bold tracking-[0.08em] uppercase text-ink-3">
-              — {t.author}
-            </footer>
-          </blockquote>
+          <StaggerCard key={i}>
+            <blockquote className="bg-white border border-border rounded-lg p-6 shadow-sm flex flex-col h-full">
+              {/* Étoiles */}
+              <div className="flex gap-0.5 mb-4 text-warn text-sm">
+                <StarRating />
+              </div>
+              <p className="text-[0.88rem] text-ink leading-[1.6] italic flex-1 mb-4">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <footer className="text-[0.72rem] font-bold tracking-[0.08em] uppercase text-ink-3">
+                — {t.author}
+              </footer>
+            </blockquote>
+          </StaggerCard>
         ))}
-      </div>
+      </StaggerGrid>
 
       <div className="text-center">
         <Button
@@ -364,7 +376,7 @@ function CtaContactBand() {
 
 function VehiclesPreview() {
   return (
-    <section className="wrap py-20 md:py-28">
+    <section className="wrap py-16 md:py-20">
       {/* En-tête */}
       <div className="mb-12 max-w-2xl">
         <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
@@ -379,28 +391,29 @@ function VehiclesPreview() {
       </div>
 
       {/* Cards véhicules — depuis le JSON */}
-      <div className="card-grid-3 mb-10">
+      <StaggerGrid className="card-grid-3 mb-10">
         {PREVIEW_VEHICLES.map((v) => (
-          <VehicleCard
-            key={v.id}
-            make={v.make}
-            model={v.model}
-            year={v.year}
-            km={v.km}
-            transmission={v.transmission}
-            fuel={v.fuel}
-            price={v.price}
-            source={v.source}
-            imageSrc={v.image ?? undefined}
-            badge={v.badge ? {
-              variant: v.badgeVariant,
-              dot: v.badgeVariant === 'success',
-              label: v.badge,
-            } : undefined}
-            href={v.source === 'autoscout24' && v.autoscoutUrl ? v.autoscoutUrl : undefined}
-          />
+          <StaggerCard key={v.id}>
+            <VehicleCard
+              make={v.make}
+              model={v.model}
+              year={v.year}
+              km={v.km}
+              transmission={v.transmission}
+              fuel={v.fuel}
+              price={v.price}
+              source={v.source}
+              imageSrc={v.image ?? undefined}
+              badge={v.badge ? {
+                variant: v.badgeVariant,
+                dot: v.badgeVariant === 'success',
+                label: v.badge,
+              } : undefined}
+              href={v.source === 'autoscout24' && v.autoscoutUrl ? v.autoscoutUrl : undefined}
+            />
+          </StaggerCard>
         ))}
-      </div>
+      </StaggerGrid>
 
       <div className="text-center">
         <Button variant="ghost" as="a" href="/vehicules-occasion">

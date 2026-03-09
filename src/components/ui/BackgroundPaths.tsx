@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { TEAM, waLink } from '@/data/contacts'
 
@@ -178,7 +179,7 @@ export default function BackgroundPaths({
             transition={{ delay: 2, duration: 1 }}
             className="mt-8 flex items-center justify-center gap-2 text-[0.78rem] text-[#7D89A3]"
           >
-            <span className="text-[#D97706]">⭐</span>
+            <Star size={14} className="text-[#D97706]" fill="currentColor" strokeWidth={0} />
             Avis clients vérifiés · Google My Business
           </motion.div>
         </motion.div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 import Image from 'next/image'
+import { CarFront } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Badge, { BadgeVariant } from './Badge'
 import Button from './Button'
@@ -177,7 +178,7 @@ export default function VehicleCard({
   description,
   imageSrc,
   images,
-  imageEmoji   = '🚗',
+  imageEmoji,
   imageBg,
   source       = 'direct',
   badge,
@@ -219,8 +220,8 @@ export default function VehicleCard({
         {hasImages ? (
           <ImageCarousel images={allImages} alt={`${make} ${model} ${year}`} />
         ) : (
-          <div className="flex items-center justify-center h-full text-[3.5rem]">
-            <span role="img" aria-label={`${make} ${model}`}>{imageEmoji}</span>
+          <div className="flex items-center justify-center h-full">
+            <CarFront size={48} className="text-blue/40" strokeWidth={1.2} aria-label={`${make} ${model}`} />
           </div>
         )}
 

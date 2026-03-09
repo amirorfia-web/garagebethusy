@@ -23,6 +23,11 @@
     line-height: 1.65;
   }
 
+  /* Cursor pointer on all clickables */
+  a, button, [role="button"], summary, [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer;
+  }
+
   /* Scrollbar fine */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }

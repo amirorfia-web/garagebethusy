@@ -5,8 +5,8 @@ import Badge, { BadgeProps } from './Badge'
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface CardProps {
-  /** Emoji ou caractère utilisé comme icône (ex: "🔧") */
-  icon:         string
+  /** Lucide icon element or fallback string */
+  icon:         React.ReactNode
   title:        string
   description:  string
   badge?:       BadgeProps & { children: string }

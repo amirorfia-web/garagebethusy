@@ -20,9 +20,21 @@ export interface Vehicle {
   autoscoutUrl: string | null
   visible: boolean
   createdAt: string
+  /** Véhicule archivé (vendu, supprimé…) */
+  archived?: boolean
+  /** Date ISO d'archivage */
+  archivedAt?: string | null
+  /** Raison d'archivage */
+  archiveReason?: 'vendu' | 'supprimé' | 'autre' | null
 }
 
 export type VehicleInput = Omit<Vehicle, 'id' | 'createdAt'>
+
+export const ARCHIVE_REASONS = [
+  { value: 'vendu', label: 'Vendu' },
+  { value: 'supprimé', label: 'Supprimé' },
+  { value: 'autre', label: 'Autre' },
+] as const
 
 export const BADGE_OPTIONS = [
   { value: 'Disponible', variant: 'blue' as const },

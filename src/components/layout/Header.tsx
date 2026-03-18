@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
@@ -80,21 +81,18 @@ export default function Header() {
           scrolled && 'shadow-sm',
         )}
       >
-        <div className="wrap flex items-center justify-between h-14 md:h-16">
+        <div className="wrap flex items-center justify-between h-[4rem] md:h-[5rem]">
 
           {/* ── Logo + Nom ── */}
           <Link href="/" className="flex items-center gap-3 no-underline shrink-0">
-            <div className="w-9 h-9 bg-blue rounded-sm flex items-center justify-center font-display font-black text-[1rem] text-white leading-none">
-              GB
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-display font-extrabold text-[0.95rem] tracking-[0.05em] uppercase text-ink leading-none block">
-                Garage Béthusy-Beaumont
-              </span>
-              <span className="text-[0.6rem] font-semibold tracking-[0.1em] uppercase text-ink-3 leading-none">
-                AFGP Sàrl · Lausanne · depuis 2006
-              </span>
-            </div>
+            <Image
+              src="/images/logo-gb.png"
+              alt="Garage Béthusy — Réparations toutes marques"
+              width={640}
+              height={160}
+              className="h-[7rem] sm:h-[9rem] w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* ── Nav desktop ── */}

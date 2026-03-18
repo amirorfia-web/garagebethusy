@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { CarFront } from 'lucide-react'
 import type { Vehicle } from '@/data/vehicle-types'
-import { BADGE_OPTIONS, FUEL_OPTIONS, TRANSMISSION_OPTIONS } from '@/data/vehicle-types'
+import { BADGE_OPTIONS, FUEL_OPTIONS, TRANSMISSION_OPTIONS, ARCHIVE_REASONS } from '@/data/vehicle-types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -917,6 +917,10 @@ export default function AdminPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<(VehicleFormData) | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [archiveModal, setArchiveModal] = useState<string | null>(null)
+  const [archiveReason, setArchiveReason] = useState<'vendu' | 'supprimé' | 'autre'>('vendu')
+  const [permanentDeleteConfirm, setPermanentDeleteConfirm] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'vehicles' | 'archives'>('vehicles')
   const [toast, setToast] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
@@ -971,10 +975,30 @@ export default function AdminPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleArchive = async (id: string, reason: 'vendu' | 'supprimé' | 'autre') => {
     if (!password) return
     const res = await fetch('/api/vehicles', {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${password}`,
+      },
+      body: JSON.stringify({ id, reason }),
+    })
+
+    if (res.ok) {
+      const label = reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé'
+      showToast(label)
+      setArchiveModal(null)
+      setDeleteConfirm(null)
+      fetchVehicles(password)
+    }
+  }
+
+  const handleRestore = async (id: string) => {
+    if (!password) return
+    const res = await fetch('/api/vehicles', {
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${password}`,
@@ -983,8 +1007,25 @@ export default function AdminPage() {
     })
 
     if (res.ok) {
-      showToast('Véhicule supprimé')
-      setDeleteConfirm(null)
+      showToast('Véhicule restauré (masqué par défaut)')
+      fetchVehicles(password)
+    }
+  }
+
+  const handlePermanentDelete = async (id: string) => {
+    if (!password) return
+    const res = await fetch('/api/vehicles', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${password}`,
+      },
+      body: JSON.stringify({ id, permanent: true }),
+    })
+
+    if (res.ok) {
+      showToast('Véhicule supprimé définitivement')
+      setPermanentDeleteConfirm(null)
       fetchVehicles(password)
     }
   }
@@ -1014,8 +1055,10 @@ export default function AdminPage() {
 
   // ── Dashboard ─────────────────────────────────────────────────────────────
 
-  const visibleCount = vehicles.filter((v) => v.visible).length
-  const hiddenCount = vehicles.length - visibleCount
+  const activeVehicles = vehicles.filter((v) => !v.archived)
+  const archivedVehicles = vehicles.filter((v) => v.archived)
+  const visibleCount = activeVehicles.filter((v) => v.visible).length
+  const hiddenCount = activeVehicles.length - visibleCount
 
   return (
     <div className="fixed inset-0 z-[200] bg-[#F8F9FC] overflow-auto">
@@ -1035,7 +1078,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h1 className="font-bold text-sm text-[#080F28]">Gestion des véhicules</h1>
-              <p className="text-xs text-[#7D89A3]">{visibleCount} visible{visibleCount > 1 ? 's' : ''} · {hiddenCount} masqué{hiddenCount > 1 ? 's' : ''}</p>
+              <p className="text-xs text-[#7D89A3]">{visibleCount} visible{visibleCount > 1 ? 's' : ''} · {hiddenCount} masqué{hiddenCount > 1 ? 's' : ''} · {archivedVehicles.length} archivé{archivedVehicles.length > 1 ? 's' : ''}</p>
             </div>
           </div>
 
@@ -1058,149 +1101,319 @@ export default function AdminPage() {
         </div>
       </header>
 
+      {/* Onglets */}
+      <div className="max-w-6xl mx-auto px-4 pt-4">
+        <div className="flex gap-1 border-b border-[#DDE3F0]">
+          <button
+            onClick={() => setActiveTab('vehicles')}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+              activeTab === 'vehicles'
+                ? 'border-[#1649C8] text-[#1649C8]'
+                : 'border-transparent text-[#7D89A3] hover:text-[#080F28]'
+            }`}
+          >
+            Véhicules ({activeVehicles.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('archives')}
+            className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'archives'
+                ? 'border-[#1649C8] text-[#1649C8]'
+                : 'border-transparent text-[#7D89A3] hover:text-[#080F28]'
+            }`}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+            Archives ({archivedVehicles.length})
+          </button>
+        </div>
+      </div>
+
       {/* Contenu */}
       <main className="max-w-6xl mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-20 text-[#7D89A3]">Chargement...</div>
         ) : authError ? (
           <div className="text-center py-20 text-red-600">Mot de passe incorrect. Rechargez la page.</div>
-        ) : vehicles.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-[#7D89A3] mb-4">Aucun véhicule pour le moment.</p>
-            <button
-              onClick={() => { setShowForm(true); setEditingVehicle(null) }}
-              className="bg-[#1649C8] text-white font-bold text-sm px-6 py-2.5 rounded-lg hover:bg-[#0D2E8F] transition-colors"
-            >
-              Ajouter votre premier véhicule
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {vehicles.map((v) => (
-              <div
-                key={v.id}
-                className={`bg-white border rounded-lg p-4 flex items-center gap-4 transition-all ${
-                  v.visible ? 'border-[#DDE3F0]' : 'border-[#DDE3F0] opacity-50'
-                }`}
+        ) : activeTab === 'vehicles' ? (
+          /* ── ONGLET VÉHICULES ACTIFS ──────────────────────────────── */
+          activeVehicles.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-[#7D89A3] mb-4">Aucun véhicule pour le moment.</p>
+              <button
+                onClick={() => { setShowForm(true); setEditingVehicle(null) }}
+                className="bg-[#1649C8] text-white font-bold text-sm px-6 py-2.5 rounded-lg hover:bg-[#0D2E8F] transition-colors"
               >
-                {/* Image miniature */}
-                <div className="w-20 h-14 rounded-md overflow-hidden bg-[#EAF0FF] shrink-0 flex items-center justify-center">
-                  {(v.images?.length > 0 || v.image) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={v.images?.[0] || v.image!} alt={`${v.make} ${v.model}`} className="w-full h-full object-cover" />
-                  ) : (
-                    <CarFront size={28} className="text-blue/40" strokeWidth={1.5} />
-                  )}
-                </div>
-
-                {/* Infos */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-bold text-sm text-[#080F28] truncate">
-                      {v.make} {v.model}
-                    </h3>
-                    <span className={`text-[0.6rem] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                      v.badgeVariant === 'success' ? 'bg-green-50 text-green-700' :
-                      v.badgeVariant === 'blue' ? 'bg-blue-50 text-blue-700' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {v.badge}
-                    </span>
-                    {!v.visible && (
-                      <span className="text-[0.6rem] font-bold uppercase px-1.5 py-0.5 rounded-full bg-red-50 text-red-600">
-                        Masqué
-                      </span>
+                Ajouter votre premier véhicule
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {activeVehicles.map((v) => (
+                <div
+                  key={v.id}
+                  className={`bg-white border rounded-lg p-4 flex items-center gap-4 transition-all ${
+                    v.visible ? 'border-[#DDE3F0]' : 'border-[#DDE3F0] opacity-50'
+                  }`}
+                >
+                  {/* Image miniature */}
+                  <div className="w-20 h-14 rounded-md overflow-hidden bg-[#EAF0FF] shrink-0 flex items-center justify-center">
+                    {(v.images?.length > 0 || v.image) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={v.images?.[0] || v.image!} alt={`${v.make} ${v.model}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <CarFront size={28} className="text-blue/40" strokeWidth={1.5} />
                     )}
                   </div>
-                  <p className="text-xs text-[#7D89A3]">
-                    {v.month ? `${String(v.month).padStart(2, '0')}.${v.year}` : v.year} · {formatKm(v.km)} · {v.transmission} · {v.fuel} · {formatCHF(v.price)}
-                    {v.images?.length > 1 && <span className="ml-1 text-[#1649C8]">· {v.images.length} photos</span>}
-                  </p>
-                  {v.description && (
-                    <p className="text-xs text-[#7D89A3] mt-0.5 truncate max-w-md italic">
-                      {v.description}
-                    </p>
-                  )}
-                </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={() => handleToggleVisibility(v)}
-                    className="p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors"
-                    title={v.visible ? 'Masquer' : 'Rendre visible'}
-                  >
-                    {v.visible ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      // Construire le tableau images (rétro-compatibilité)
-                      const vehicleImages = (v.images && v.images.length > 0)
-                        ? v.images
-                        : v.image
-                          ? [v.image]
-                          : []
-                      setEditingVehicle({
-                        id: v.id,
-                        make: v.make,
-                        model: v.model,
-                        year: v.year,
-                        month: v.month ?? null,
-                        km: v.km,
-                        transmission: v.transmission,
-                        fuel: v.fuel,
-                        price: v.price,
-                        badge: v.badge,
-                        badgeVariant: v.badgeVariant,
-                        source: v.source,
-                        description: v.description ?? '',
-                        image: v.image ?? '',
-                        images: vehicleImages,
-                        autoscoutUrl: v.autoscoutUrl ?? '',
-                        visible: v.visible,
-                      })
-                      setShowForm(true)
-                    }}
-                    className="p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#1649C8] transition-colors"
-                    title="Modifier"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-
-                  {deleteConfirm === v.id ? (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleDelete(v.id)}
-                        className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded hover:bg-red-100 transition-colors"
-                      >
-                        Confirmer
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="text-xs text-[#7D89A3] px-2 py-1 rounded hover:bg-[#F8F9FC] transition-colors"
-                      >
-                        Annuler
-                      </button>
+                  {/* Infos */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-bold text-sm text-[#080F28] truncate">
+                        {v.make} {v.model}
+                      </h3>
+                      <span className={`text-[0.6rem] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                        v.badgeVariant === 'success' ? 'bg-green-50 text-green-700' :
+                        v.badgeVariant === 'blue' ? 'bg-blue-50 text-blue-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {v.badge}
+                      </span>
+                      {!v.visible && (
+                        <span className="text-[0.6rem] font-bold uppercase px-1.5 py-0.5 rounded-full bg-red-50 text-red-600">
+                          Masqué
+                        </span>
+                      )}
                     </div>
-                  ) : (
+                    <p className="text-xs text-[#7D89A3]">
+                      {v.month ? `${String(v.month).padStart(2, '0')}.${v.year}` : v.year} · {formatKm(v.km)} · {v.transmission} · {v.fuel} · {formatCHF(v.price)}
+                      {v.images?.length > 1 && <span className="ml-1 text-[#1649C8]">· {v.images.length} photos</span>}
+                    </p>
+                    {v.description && (
+                      <p className="text-xs text-[#7D89A3] mt-0.5 truncate max-w-md italic">
+                        {v.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
-                      onClick={() => setDeleteConfirm(v.id)}
-                      className="p-2 rounded-md hover:bg-red-50 text-[#7D89A3] hover:text-red-600 transition-colors"
-                      title="Supprimer"
+                      onClick={() => handleToggleVisibility(v)}
+                      className="p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors"
+                      title={v.visible ? 'Masquer' : 'Rendre visible'}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                      {v.visible ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      )}
                     </button>
-                  )}
+                    <button
+                      onClick={() => {
+                        const vehicleImages = (v.images && v.images.length > 0)
+                          ? v.images
+                          : v.image
+                            ? [v.image]
+                            : []
+                        setEditingVehicle({
+                          id: v.id,
+                          make: v.make,
+                          model: v.model,
+                          year: v.year,
+                          month: v.month ?? null,
+                          km: v.km,
+                          transmission: v.transmission,
+                          fuel: v.fuel,
+                          price: v.price,
+                          badge: v.badge,
+                          badgeVariant: v.badgeVariant,
+                          source: v.source,
+                          description: v.description ?? '',
+                          image: v.image ?? '',
+                          images: vehicleImages,
+                          autoscoutUrl: v.autoscoutUrl ?? '',
+                          visible: v.visible,
+                        })
+                        setShowForm(true)
+                      }}
+                      className="p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#1649C8] transition-colors"
+                      title="Modifier"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+
+                    {/* Archiver — avec choix de raison */}
+                    <button
+                      onClick={() => { setArchiveModal(v.id); setArchiveReason('vendu') }}
+                      className="p-2 rounded-md hover:bg-amber-50 text-[#7D89A3] hover:text-amber-600 transition-colors"
+                      title="Archiver"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          /* ── ONGLET ARCHIVES ─────────────────────────────────────── */
+          archivedVehicles.length === 0 ? (
+            <div className="text-center py-20">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7D89A3" strokeWidth="1.5" className="mx-auto mb-4 opacity-40"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+              <p className="text-[#7D89A3]">Aucun véhicule archivé.</p>
+              <p className="text-xs text-[#7D89A3]/60 mt-1">Les véhicules vendus ou supprimés apparaîtront ici.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {/* Stats archives */}
+              <div className="bg-white border border-[#DDE3F0] rounded-lg p-4 mb-4 flex gap-6 text-sm">
+                <div>
+                  <span className="text-[#7D89A3]">Total archivés : </span>
+                  <span className="font-bold text-[#080F28]">{archivedVehicles.length}</span>
+                </div>
+                <div>
+                  <span className="text-[#7D89A3]">Vendus : </span>
+                  <span className="font-bold text-green-700">{archivedVehicles.filter(v => v.archiveReason === 'vendu').length}</span>
+                </div>
+                <div>
+                  <span className="text-[#7D89A3]">Supprimés : </span>
+                  <span className="font-bold text-red-600">{archivedVehicles.filter(v => v.archiveReason === 'supprimé').length}</span>
+                </div>
+                <div>
+                  <span className="text-[#7D89A3]">Autres : </span>
+                  <span className="font-bold text-[#080F28]">{archivedVehicles.filter(v => v.archiveReason === 'autre').length}</span>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {archivedVehicles.map((v) => (
+                <div
+                  key={v.id}
+                  className="bg-white border border-[#DDE3F0] rounded-lg p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-all"
+                >
+                  {/* Image miniature */}
+                  <div className="w-20 h-14 rounded-md overflow-hidden bg-[#EAF0FF] shrink-0 flex items-center justify-center">
+                    {(v.images?.length > 0 || v.image) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={v.images?.[0] || v.image!} alt={`${v.make} ${v.model}`} className="w-full h-full object-cover grayscale" />
+                    ) : (
+                      <CarFront size={28} className="text-blue/40" strokeWidth={1.5} />
+                    )}
+                  </div>
+
+                  {/* Infos */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-bold text-sm text-[#080F28] truncate">
+                        {v.make} {v.model}
+                      </h3>
+                      <span className={`text-[0.6rem] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                        v.archiveReason === 'vendu' ? 'bg-green-50 text-green-700' :
+                        v.archiveReason === 'supprimé' ? 'bg-red-50 text-red-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {v.archiveReason === 'vendu' ? 'Vendu' : v.archiveReason === 'supprimé' ? 'Supprimé' : 'Archivé'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#7D89A3]">
+                      {v.month ? `${String(v.month).padStart(2, '0')}.${v.year}` : v.year} · {formatKm(v.km)} · {formatCHF(v.price)}
+                      {v.archivedAt && (
+                        <span className="ml-1">· Archivé le {new Date(v.archivedAt).toLocaleDateString('fr-CH')}</span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Actions archives */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Restaurer */}
+                    <button
+                      onClick={() => handleRestore(v.id)}
+                      className="text-xs font-semibold text-[#1649C8] bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1"
+                      title="Restaurer le véhicule"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                      Restaurer
+                    </button>
+
+                    {/* Supprimer définitivement */}
+                    {permanentDeleteConfirm === v.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handlePermanentDelete(v.id)}
+                          className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1.5 rounded hover:bg-red-100 transition-colors"
+                        >
+                          Supprimer
+                        </button>
+                        <button
+                          onClick={() => setPermanentDeleteConfirm(null)}
+                          className="text-xs text-[#7D89A3] px-2 py-1.5 rounded hover:bg-[#F8F9FC] transition-colors"
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setPermanentDeleteConfirm(v.id)}
+                        className="p-2 rounded-md hover:bg-red-50 text-[#7D89A3] hover:text-red-600 transition-colors"
+                        title="Supprimer définitivement"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </main>
+
+      {/* Modal choix raison d'archivage */}
+      {archiveModal && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+            <h3 className="font-bold text-[#080F28] mb-1">Archiver ce véhicule</h3>
+            <p className="text-xs text-[#7D89A3] mb-5">Le véhicule sera déplacé dans les archives. Vous pourrez le restaurer à tout moment.</p>
+
+            <div className="space-y-2 mb-6">
+              {ARCHIVE_REASONS.map((r) => (
+                <label
+                  key={r.value}
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                    archiveReason === r.value
+                      ? 'border-[#1649C8] bg-blue-50'
+                      : 'border-[#DDE3F0] hover:bg-[#F8F9FC]'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="archiveReason"
+                    value={r.value}
+                    checked={archiveReason === r.value}
+                    onChange={() => setArchiveReason(r.value as typeof archiveReason)}
+                    className="accent-[#1649C8]"
+                  />
+                  <span className="text-sm font-medium text-[#080F28]">{r.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleArchive(archiveModal, archiveReason)}
+                className="flex-1 bg-amber-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Archiver
+              </button>
+              <button
+                onClick={() => setArchiveModal(null)}
+                className="px-6 border border-[#DDE3F0] text-[#3D4A66] font-medium text-sm py-2.5 rounded-lg hover:bg-[#F8F9FC] transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal formulaire */}
       {showForm && (

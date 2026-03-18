@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
   const vehicles = await readVehicles()
   const showAll = request.nextUrl.searchParams.get('all') === 'true'
 
-  // Si ?all=true et authentifié, retourner tous les véhicules
+  // Si ?all=true et authentifié, retourner tous les véhicules (y compris archivés)
   if (showAll && checkAuth(request)) {
     return NextResponse.json(vehicles)
   }
 
-  // Sinon, seulement les véhicules visibles
-  const visible = vehicles.filter((v) => v.visible)
+  // Sinon, seulement les véhicules visibles et non-archivés
+  const visible = vehicles.filter((v) => v.visible && !v.archived)
   return NextResponse.json(visible)
 }
 
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// ── DELETE — Supprimer un véhicule ──────────────────────────────────────────
+// ── DELETE — Archiver un véhicule (ou suppression définitive) ───────────────
 
 export async function DELETE(request: NextRequest) {
   if (!checkAuth(request)) {
@@ -149,16 +149,66 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { id } = await request.json()
+    const { id, permanent, reason } = await request.json()
     const vehicles = await readVehicles()
-    const filtered = vehicles.filter((v) => v.id !== id)
 
-    if (filtered.length === vehicles.length) {
+    // Suppression définitive (depuis les archives)
+    if (permanent) {
+      const filtered = vehicles.filter((v) => v.id !== id)
+      if (filtered.length === vehicles.length) {
+        return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+      }
+      await writeVehicles(filtered)
+      return NextResponse.json({ success: true, action: 'deleted' })
+    }
+
+    // Archivage (soft-delete)
+    const index = vehicles.findIndex((v) => v.id === id)
+    if (index === -1) {
       return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
     }
 
-    await writeVehicles(filtered)
-    return NextResponse.json({ success: true })
+    vehicles[index] = {
+      ...vehicles[index],
+      archived: true,
+      archivedAt: new Date().toISOString(),
+      archiveReason: reason || 'supprimé',
+      visible: false,
+    }
+
+    await writeVehicles(vehicles)
+    return NextResponse.json({ success: true, action: 'archived' })
+  } catch {
+    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+  }
+}
+
+// ── PATCH — Restaurer un véhicule depuis les archives ───────────────────────
+
+export async function PATCH(request: NextRequest) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  }
+
+  try {
+    const { id } = await request.json()
+    const vehicles = await readVehicles()
+    const index = vehicles.findIndex((v) => v.id === id)
+
+    if (index === -1) {
+      return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+    }
+
+    vehicles[index] = {
+      ...vehicles[index],
+      archived: false,
+      archivedAt: null,
+      archiveReason: null,
+      visible: false, // restauré mais masqué par défaut — l'admin choisit quand rendre visible
+    }
+
+    await writeVehicles(vehicles)
+    return NextResponse.json({ success: true, action: 'restored' })
   } catch {
     return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
   }

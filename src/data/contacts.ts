@@ -41,27 +41,27 @@ export interface TeamMember {
 
 export const TEAM: TeamMember[] = [
   {
-    name: 'Alex',
-    fullName: 'Alessandro',
-    role: 'Fondateur & Associé',
-    phone: '+41 79 129 55 91',
-    phoneRaw: '41791295591',
-    waMessage: 'Bonjour Alex, je vous contacte depuis le site du garage.',
-  },
-  {
     name: 'Valon',
     fullName: 'Valon',
     role: 'Associé',
-    phone: '+41 79 000 00 01',
-    phoneRaw: '41790000001',
+    phone: '+41 79 883 75 18',
+    phoneRaw: '41798837518',
     waMessage: 'Bonjour Valon, je vous contacte depuis le site du garage.',
+  },
+  {
+    name: 'Alex',
+    fullName: 'Alessandro',
+    role: 'Fondateur & Associé',
+    phone: '+41 79 257 77 63',
+    phoneRaw: '41792577763',
+    waMessage: 'Bonjour Alex, je vous contacte depuis le site du garage.',
   },
   {
     name: 'Brah',
     fullName: 'Brah',
     role: 'Associé',
-    phone: '+41 79 000 00 02',
-    phoneRaw: '41790000002',
+    phone: '+41 78 699 06 36',
+    phoneRaw: '41786990636',
     waMessage: 'Bonjour Brah, je vous contacte depuis le site du garage.',
   },
 ]

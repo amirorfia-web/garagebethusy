@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { GARAGE, TEAM, waLink, phoneLink } from '@/data/contacts'
 
 const NAV_LINKS = [
@@ -42,15 +43,14 @@ export default function Footer() {
 
           {/* Colonne 1 — Identité + Téléphone */}
           <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 bg-blue rounded-[5px] flex items-center justify-center font-display font-black text-[0.85rem] text-white">
-                GB
-              </div>
-              <div>
-                <p className="font-display font-extrabold text-[0.85rem] tracking-[0.05em] uppercase text-white leading-none">
-                  Garage Béthusy-Beaumont
-                </p>
-              </div>
+            <div className="mb-4 bg-white rounded-lg p-3 inline-block">
+              <Image
+                src="/images/logo-gb.png"
+                alt="Garage Béthusy"
+                width={400}
+                height={112}
+                className="h-[7rem] w-auto object-contain"
+              />
             </div>
             <p className="text-[0.8rem] leading-relaxed text-white/50 mb-4">
               {GARAGE.company}<br />

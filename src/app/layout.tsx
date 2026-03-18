@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Barlow_Condensed, DM_Sans } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import WhatsAppSticky from '@/components/layout/WhatsAppSticky'
 import './globals.css'
+
+const GA_ID = 'G-HF43RKDHTB'
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
@@ -51,6 +54,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${barlowCondensed.variable} ${dmSans.variable}`}>
+      <head>
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1">{children}</main>

@@ -7,7 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Card from '@/components/ui/Card'
 import VehicleCard from '@/components/ui/VehicleCard'
 import StatStrip from '@/components/ui/StatStrip'
-import BackgroundPaths from '@/components/ui/BackgroundPaths'
+import { FloatingPaths } from '@/components/ui/BackgroundPaths'
 import { StarRating } from '@/components/ui/Icons'
 import type { Vehicle } from '@/data/vehicle-types'
 import vehiclesData from '@/data/vehicles.json'
@@ -30,34 +30,30 @@ export const metadata: Metadata = {
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-12 pb-10 md:pt-20 md:pb-16">
-      {/* Diagonal blue slab (desktop) */}
-      <div
-        className="hidden md:block absolute top-0 right-[-5%] w-[52%] h-full z-0"
-        style={{
-          background: 'linear-gradient(160deg, #1649C8 0%, #2B5CE6 100%)',
-          clipPath: 'polygon(8% 0, 100% 0, 100% 100%, 0 100%)',
-        }}
-        aria-hidden
-      />
-      {/* Grid overlay on blue side */}
-      <div
-        className="hidden md:block absolute top-0 right-0 w-[52%] h-full z-[1] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
-        }}
-        aria-hidden
-      />
+    <section className="relative overflow-hidden min-h-[85vh] flex items-center bg-[#F8F9FC]">
+      {/* Animated flowing paths background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+      </div>
 
-      <div className="wrap relative z-[2]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      {/* Subtle wrench watermark */}
+      <svg
+        className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[500px] h-[500px] md:w-[700px] md:h-[700px] text-blue/[0.02] pointer-events-none"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" />
+      </svg>
+
+      <div className="wrap relative z-[2] py-12 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left — Texte */}
           <div>
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 text-[0.7rem] font-bold tracking-[0.15em] uppercase text-blue bg-blue-light border border-blue/18 px-3 py-1 rounded-pill mb-6">
-              <span className="w-[5px] h-[5px] rounded-full bg-blue" aria-hidden />
+              <span className="w-[5px] h-[5px] rounded-full bg-blue animate-blink" aria-hidden />
               Garage indépendant · Lausanne · Depuis 2006
             </div>
 
@@ -91,7 +87,7 @@ function HeroSection() {
             </div>
           </div>
 
-          {/* Right — Photo façade (desktop) */}
+          {/* Right — Image hero */}
           <div className="hidden md:block">
             <div className="relative aspect-[4/3] w-full rounded-xl shadow-lg overflow-hidden">
               <Image
@@ -431,7 +427,7 @@ function VehiclesPreview() {
 export default function HomePage() {
   return (
     <>
-      <BackgroundPaths />
+      <HeroSection />
       <ReassuranceStrip />
       <IntroSection />
       <ServicesPreview />

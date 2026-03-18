@@ -17,21 +17,76 @@ const PRESTATIONS = [
 ]
 
 export default function ContactForm() {
+  const [sending, setSending] = React.useState(false)
+  const [sent, setSent] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSending(true)
+    setError(null)
+
+    const form = e.currentTarget
+    const data = {
+      prenom: (form.elements.namedItem('prenom') as HTMLInputElement).value,
+      nom: (form.elements.namedItem('nom') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      telephone: (form.elements.namedItem('telephone') as HTMLInputElement).value,
+      prestation: (form.elements.namedItem('prestation') as HTMLSelectElement).value,
+      vehicule: (form.elements.namedItem('vehicule') as HTMLInputElement).value,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+    }
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!res.ok) {
+        const body = await res.json()
+        throw new Error(body.error || 'Erreur lors de l\'envoi')
+      }
+
+      setSent(true)
+      form.reset()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div id="devis" className="bg-white border border-green-200 rounded-xl p-6 md:p-8 shadow-sm text-center">
+        <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0E9F6E" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 className="font-display font-black text-xl uppercase text-ink mb-2">Message envoyé !</h3>
+        <p className="text-body-sm text-ink-2">Merci pour votre message. Nous vous répondons dans les meilleurs délais.</p>
+        <button
+          onClick={() => setSent(false)}
+          className="mt-4 text-sm text-blue hover:underline"
+        >
+          Envoyer un autre message
+        </button>
+      </div>
+    )
+  }
+
   return (
     <form
       id="devis"
       className="bg-white border border-border rounded-xl p-6 md:p-8 shadow-sm"
-      onSubmit={(e) => {
-        e.preventDefault()
-        // TODO: intégrer l'envoi réel (API route, email, etc.)
-        alert('Formulaire envoyé — merci ! Nous vous répondons sous 2h.')
-      }}
+      onSubmit={handleSubmit}
     >
       <h2 className="font-display font-black text-h3 uppercase text-ink mb-2 leading-none">
         Formulaire de contact
       </h2>
       <p className="text-body-sm text-ink-2 leading-[1.65] mb-8">
-        Pour une question, une demande d&apos;information, ou un devis — on vous répond dans les 2 heures ouvrées.
+        Pour une question, une demande d&apos;information, ou un devis — on vous répond dans les meilleurs délais.
       </p>
 
       <div className="space-y-5">
@@ -95,10 +150,17 @@ export default function ContactForm() {
           required
         />
 
+        {/* Erreur */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+
         {/* Submit */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
-          <Button variant="primary" size="lg">
-            Envoyer — réponse sous 2h
+          <Button variant="primary" size="lg" disabled={sending}>
+            {sending ? 'Envoi en cours…' : 'Envoyer'}
           </Button>
           <p className="text-[0.72rem] text-ink-3 leading-[1.5]">
             Vos données sont utilisées uniquement pour vous répondre. Aucun démarchage commercial.

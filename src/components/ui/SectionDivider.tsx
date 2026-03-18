@@ -76,7 +76,7 @@ export function TrustBand({ className }: DividerProps) {
   const stats = [
     { value: '20+', label: 'ans d\'expérience' },
     { value: '3', label: 'associés passionnés' },
-    { value: '5★', label: 'avis Google' },
+    { value: '4.6★', label: 'avis Google' },
     { value: '∞', label: 'marques acceptées' },
   ]
   return (

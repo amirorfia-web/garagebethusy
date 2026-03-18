@@ -19,7 +19,7 @@ export const GARAGE = {
   mapsUrl: 'https://maps.app.goo.gl/YOUR_MAP_LINK',
   mapsEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.5!2d6.6434!3d46.5197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478c2e3b1e3b3b3b%3A0x1234567890abcdef!2sAv.%20de%20B%C3%A9thusy%2027%2C%201005%20Lausanne!5e0!3m2!1sfr!2sch!4v1700000000000!5m2!1sfr!2sch',
   /** Google My Business */
-  googleReviewsUrl: 'https://g.page/garage-bethusy/review',
+  googleReviewsUrl: 'https://www.google.com/maps/place/Garage+de+B%C3%A9thusy+Beaumont,+Frulloni/@46.521685,6.6434641,584m/data=!3m1!1e3!4m8!3m7!1s0x478c2e495d0891b3:0x9da328587de9a393!8m2!3d46.521685!4d6.646039!9m1!1b1!16s%2Fg%2F1tf6l2p9?entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D',
   /** AutoScout24 */
   autoscoutUrl: 'https://www.autoscout24.ch',
   /** Horaires */
@@ -41,14 +41,6 @@ export interface TeamMember {
 
 export const TEAM: TeamMember[] = [
   {
-    name: 'Valon',
-    fullName: 'Valon',
-    role: 'Associé',
-    phone: '+41 79 883 75 18',
-    phoneRaw: '41798837518',
-    waMessage: 'Bonjour Valon, je vous contacte depuis le site du garage.',
-  },
-  {
     name: 'Alex',
     fullName: 'Alessandro',
     role: 'Fondateur & Associé',
@@ -63,6 +55,14 @@ export const TEAM: TeamMember[] = [
     phone: '+41 78 699 06 36',
     phoneRaw: '41786990636',
     waMessage: 'Bonjour Brah, je vous contacte depuis le site du garage.',
+  },
+  {
+    name: 'Valon',
+    fullName: 'Valon',
+    role: 'Associé',
+    phone: '+41 79 883 75 18',
+    phoneRaw: '41798837518',
+    waMessage: 'Bonjour Valon, je vous contacte depuis le site du garage.',
   },
 ]
 

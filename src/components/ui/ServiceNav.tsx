@@ -62,7 +62,7 @@ export default function ServiceNav() {
   return (
     <nav
       ref={navRef}
-      style={{ top: 'var(--header-h, 57px)' }}
+      style={{ top: 'var(--header-h, 5rem)' }}
       className={`sticky z-40 transition-shadow duration-300 border-b border-border bg-white/95 backdrop-blur-md ${
         isStuck ? 'shadow-md' : ''
       }`}

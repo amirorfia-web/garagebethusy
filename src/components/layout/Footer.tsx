@@ -100,7 +100,7 @@ export default function Footer() {
                     className="inline-flex items-center gap-2 text-[0.82rem] text-white/70 hover:text-wa transition-colors"
                   >
                     <WaSmall />
-                    {m.name}
+                    {m.name} ({m.phone})
                   </a>
                 </li>
               ))}

@@ -3,7 +3,7 @@ import Script from 'next/script'
 import { Barlow_Condensed, DM_Sans } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import WhatsAppSticky from '@/components/layout/WhatsAppSticky'
+// WhatsApp sticky supprimé — pas de numéro général unique
 import './globals.css'
 
 const GA_ID = 'G-HF43RKDHTB'
@@ -69,7 +69,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        <WhatsAppSticky />
+        {/* WhatsApp sticky supprimé — les 3 contacts sont dans le footer et les CTAs */}
       </body>
     </html>
   )

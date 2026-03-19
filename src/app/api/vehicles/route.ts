@@ -17,27 +17,17 @@ function checkAuth(request: NextRequest): boolean {
 
 async function readVehicles(): Promise<Vehicle[]> {
   try {
-    // Chercher le blob vehicles.json
     const { blobs } = await list({ prefix: BLOB_FILENAME })
     if (blobs.length === 0) {
-      // Fallback: lire le fichier local pour la migration initiale
-      const fs = await import('fs/promises')
-      const path = await import('path')
-      const localPath = path.join(process.cwd(), 'src/data/vehicles.json')
-      try {
-        const raw = await fs.readFile(localPath, 'utf-8')
-        const vehicles = JSON.parse(raw) as Vehicle[]
-        // Migrer vers Blob automatiquement
-        await writeVehicles(vehicles)
-        return vehicles
-      } catch {
-        return []
-      }
+      // Aucun blob encore — retourner vide (premier usage)
+      console.log('No vehicles.json blob found, starting fresh')
+      return []
     }
-    const response = await fetch(blobs[0].url)
+    const response = await fetch(blobs[0].url, { cache: 'no-store' })
     const data = await response.json()
     return data as Vehicle[]
-  } catch {
+  } catch (err) {
+    console.error('readVehicles error:', err)
     return []
   }
 }
@@ -114,8 +104,9 @@ export async function POST(request: NextRequest) {
     await writeVehicles(vehicles)
 
     return NextResponse.json(newVehicle, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
+  } catch (err) {
+    console.error('POST /api/vehicles error:', err)
+    return NextResponse.json({ error: `Erreur: ${err instanceof Error ? err.message : 'inconnue'}` }, { status: 500 })
   }
 }
 

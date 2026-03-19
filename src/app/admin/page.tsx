@@ -958,20 +958,27 @@ export default function AdminPage() {
     if (!password) return
     const isEditing = !!vehicleData.id
 
-    const res = await fetch('/api/vehicles', {
-      method: isEditing ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`,
-      },
-      body: JSON.stringify(vehicleData),
-    })
+    try {
+      const res = await fetch('/api/vehicles', {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify(vehicleData),
+      })
 
-    if (res.ok) {
-      showToast(isEditing ? 'Véhicule modifié' : 'Véhicule ajouté')
-      setShowForm(false)
-      setEditingVehicle(null)
-      fetchVehicles(password)
+      if (res.ok) {
+        showToast(isEditing ? 'Véhicule modifié' : 'Véhicule ajouté')
+        setShowForm(false)
+        setEditingVehicle(null)
+        fetchVehicles(password)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        showToast(`Erreur: ${data.error || res.statusText}`)
+      }
+    } catch (err) {
+      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
     }
   }
 

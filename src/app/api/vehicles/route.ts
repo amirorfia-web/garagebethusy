@@ -36,6 +36,7 @@ async function writeVehicles(vehicles: Vehicle[]): Promise<void> {
   await put(BLOB_FILENAME, JSON.stringify(vehicles, null, 2), {
     access: 'public',
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: 'application/json',
   })
 }

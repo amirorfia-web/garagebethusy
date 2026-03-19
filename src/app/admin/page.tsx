@@ -984,73 +984,101 @@ export default function AdminPage() {
 
   const handleArchive = async (id: string, reason: 'vendu' | 'supprimé' | 'autre') => {
     if (!password) return
-    const res = await fetch('/api/vehicles', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`,
-      },
-      body: JSON.stringify({ id, reason }),
-    })
+    try {
+      const res = await fetch('/api/vehicles', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ id, reason }),
+      })
 
-    if (res.ok) {
-      const label = reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé'
-      showToast(label)
-      setArchiveModal(null)
-      setDeleteConfirm(null)
-      fetchVehicles(password)
+      if (res.ok) {
+        const label = reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé'
+        showToast(label)
+        setArchiveModal(null)
+        setDeleteConfirm(null)
+        fetchVehicles(password)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        showToast(`Erreur: ${data.error || res.statusText}`)
+      }
+    } catch (err) {
+      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
     }
   }
 
   const handleRestore = async (id: string) => {
     if (!password) return
-    const res = await fetch('/api/vehicles', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`,
-      },
-      body: JSON.stringify({ id }),
-    })
+    try {
+      const res = await fetch('/api/vehicles', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ id }),
+      })
 
-    if (res.ok) {
-      showToast('Véhicule restauré (masqué par défaut)')
-      fetchVehicles(password)
+      if (res.ok) {
+        showToast('Véhicule restauré (masqué par défaut)')
+        fetchVehicles(password)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        showToast(`Erreur: ${data.error || res.statusText}`)
+      }
+    } catch (err) {
+      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
     }
   }
 
   const handlePermanentDelete = async (id: string) => {
     if (!password) return
-    const res = await fetch('/api/vehicles', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`,
-      },
-      body: JSON.stringify({ id, permanent: true }),
-    })
+    try {
+      const res = await fetch('/api/vehicles', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ id, permanent: true }),
+      })
 
-    if (res.ok) {
-      showToast('Véhicule supprimé définitivement')
-      setPermanentDeleteConfirm(null)
-      fetchVehicles(password)
+      if (res.ok) {
+        showToast('Véhicule supprimé définitivement')
+        setPermanentDeleteConfirm(null)
+        fetchVehicles(password)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        showToast(`Erreur: ${data.error || res.statusText}`)
+      }
+    } catch (err) {
+      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
     }
   }
 
   const handleToggleVisibility = async (vehicle: Vehicle) => {
     if (!password) return
-    const res = await fetch('/api/vehicles', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${password}`,
-      },
-      body: JSON.stringify({ ...vehicle, visible: !vehicle.visible }),
-    })
+    try {
+      const res = await fetch('/api/vehicles', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${password}`,
+        },
+        body: JSON.stringify({ ...vehicle, visible: !vehicle.visible }),
+      })
 
-    if (res.ok) {
-      showToast(vehicle.visible ? 'Véhicule masqué' : 'Véhicule rendu visible')
-      fetchVehicles(password)
+      if (res.ok) {
+        showToast(vehicle.visible ? 'Véhicule masqué' : 'Véhicule rendu visible')
+        fetchVehicles(password)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        showToast(`Erreur: ${data.error || res.statusText}`)
+      }
+    } catch (err) {
+      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
     }
   }
 

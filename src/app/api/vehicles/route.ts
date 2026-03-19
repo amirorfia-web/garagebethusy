@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs/promises'
-import path from 'path'
+import { put, list } from '@vercel/blob'
 import type { Vehicle } from '@/data/vehicle-types'
 
-const DATA_PATH = path.join(process.cwd(), 'src/data/vehicles.json')
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-// Simple auth check — en production, remplacer par un vrai système d'auth
+const BLOB_FILENAME = 'vehicles.json'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'garage2024'
 
 function checkAuth(request: NextRequest): boolean {
@@ -17,15 +17,37 @@ function checkAuth(request: NextRequest): boolean {
 
 async function readVehicles(): Promise<Vehicle[]> {
   try {
-    const raw = await fs.readFile(DATA_PATH, 'utf-8')
-    return JSON.parse(raw)
+    // Chercher le blob vehicles.json
+    const { blobs } = await list({ prefix: BLOB_FILENAME })
+    if (blobs.length === 0) {
+      // Fallback: lire le fichier local pour la migration initiale
+      const fs = await import('fs/promises')
+      const path = await import('path')
+      const localPath = path.join(process.cwd(), 'src/data/vehicles.json')
+      try {
+        const raw = await fs.readFile(localPath, 'utf-8')
+        const vehicles = JSON.parse(raw) as Vehicle[]
+        // Migrer vers Blob automatiquement
+        await writeVehicles(vehicles)
+        return vehicles
+      } catch {
+        return []
+      }
+    }
+    const response = await fetch(blobs[0].url)
+    const data = await response.json()
+    return data as Vehicle[]
   } catch {
     return []
   }
 }
 
 async function writeVehicles(vehicles: Vehicle[]): Promise<void> {
-  await fs.writeFile(DATA_PATH, JSON.stringify(vehicles, null, 2), 'utf-8')
+  await put(BLOB_FILENAME, JSON.stringify(vehicles, null, 2), {
+    access: 'public',
+    addRandomSuffix: false,
+    contentType: 'application/json',
+  })
 }
 
 function generateId(make: string, model: string, year: number): string {
@@ -36,34 +58,31 @@ function generateId(make: string, model: string, year: number): string {
   return `${slug}-${Date.now().toString(36)}`
 }
 
-// ── GET — Liste publique (véhicules visibles uniquement) ────────────────────
+// ── GET — Liste publique (vehicules visibles uniquement) ────────────────────
 
 export async function GET(request: NextRequest) {
   const vehicles = await readVehicles()
   const showAll = request.nextUrl.searchParams.get('all') === 'true'
 
-  // Si ?all=true et authentifié, retourner tous les véhicules (y compris archivés)
   if (showAll && checkAuth(request)) {
     return NextResponse.json(vehicles)
   }
 
-  // Sinon, seulement les véhicules visibles et non-archivés
   const visible = vehicles.filter((v) => v.visible && !v.archived)
   return NextResponse.json(visible)
 }
 
-// ── POST — Ajouter un véhicule ──────────────────────────────────────────────
+// ── POST — Ajouter un vehicule ──────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   if (!checkAuth(request)) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
   }
 
   try {
     const body = await request.json()
     const vehicles = await readVehicles()
 
-    // Construire le tableau d'images (rétro-compatibilité)
     const images: string[] = Array.isArray(body.images)
       ? body.images.filter(Boolean)
       : body.image
@@ -96,15 +115,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newVehicle, { status: 201 })
   } catch {
-    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
   }
 }
 
-// ── PUT — Modifier un véhicule ──────────────────────────────────────────────
+// ── PUT — Modifier un vehicule ──────────────────────────────────────────────
 
 export async function PUT(request: NextRequest) {
   if (!checkAuth(request)) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
   }
 
   try {
@@ -113,10 +132,9 @@ export async function PUT(request: NextRequest) {
     const index = vehicles.findIndex((v) => v.id === body.id)
 
     if (index === -1) {
-      return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+      return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
     }
 
-    // Construire le tableau d'images pour la mise à jour
     const updatedImages: string[] = Array.isArray(body.images)
       ? body.images.filter(Boolean)
       : body.image
@@ -137,57 +155,55 @@ export async function PUT(request: NextRequest) {
     await writeVehicles(vehicles)
     return NextResponse.json(vehicles[index])
   } catch {
-    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
   }
 }
 
-// ── DELETE — Archiver un véhicule (ou suppression définitive) ───────────────
+// ── DELETE — Archiver un vehicule (ou suppression definitive) ───────────────
 
 export async function DELETE(request: NextRequest) {
   if (!checkAuth(request)) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
   }
 
   try {
     const { id, permanent, reason } = await request.json()
     const vehicles = await readVehicles()
 
-    // Suppression définitive (depuis les archives)
     if (permanent) {
       const filtered = vehicles.filter((v) => v.id !== id)
       if (filtered.length === vehicles.length) {
-        return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+        return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
       }
       await writeVehicles(filtered)
       return NextResponse.json({ success: true, action: 'deleted' })
     }
 
-    // Archivage (soft-delete)
     const index = vehicles.findIndex((v) => v.id === id)
     if (index === -1) {
-      return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+      return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
     }
 
     vehicles[index] = {
       ...vehicles[index],
       archived: true,
       archivedAt: new Date().toISOString(),
-      archiveReason: reason || 'supprimé',
+      archiveReason: reason || 'supprime',
       visible: false,
     }
 
     await writeVehicles(vehicles)
     return NextResponse.json({ success: true, action: 'archived' })
   } catch {
-    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
   }
 }
 
-// ── PATCH — Restaurer un véhicule depuis les archives ───────────────────────
+// ── PATCH — Restaurer un vehicule depuis les archives ───────────────────────
 
 export async function PATCH(request: NextRequest) {
   if (!checkAuth(request)) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
   }
 
   try {
@@ -196,7 +212,7 @@ export async function PATCH(request: NextRequest) {
     const index = vehicles.findIndex((v) => v.id === id)
 
     if (index === -1) {
-      return NextResponse.json({ error: 'Véhicule introuvable' }, { status: 404 })
+      return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
     }
 
     vehicles[index] = {
@@ -204,12 +220,12 @@ export async function PATCH(request: NextRequest) {
       archived: false,
       archivedAt: null,
       archiveReason: null,
-      visible: false, // restauré mais masqué par défaut — l'admin choisit quand rendre visible
+      visible: false,
     }
 
     await writeVehicles(vehicles)
     return NextResponse.json({ success: true, action: 'restored' })
   } catch {
-    return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
   }
 }

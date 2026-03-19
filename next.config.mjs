@@ -6,9 +6,12 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.autoscout24.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
     ],
   },
-  // Augmenter la taille max du body pour l'upload d'images (10 MB)
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',

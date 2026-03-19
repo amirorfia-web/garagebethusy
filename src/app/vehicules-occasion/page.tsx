@@ -4,8 +4,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import VehicleCard from '@/components/ui/VehicleCard'
 import WhatsAppContact from '@/components/ui/WhatsAppContact'
-import type { Vehicle } from '@/data/vehicle-types'
-import vehiclesData from '@/data/vehicles.json'
+import { getVisibleVehicles } from '@/lib/vehicles'
 import { TEAM, GARAGE, waLink, phoneLink, waVehicleLink, emailVehicleLink } from '@/data/contacts'
 import { TripleDot } from '@/components/ui/SectionDivider'
 import { StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
@@ -16,8 +15,8 @@ export const metadata: Metadata = {
     'Véhicules d\'occasion contrôlés et préparés par notre garage. Toutes marques, prix transparents. Garage de Béthusy-Beaumont, AFGP Sàrl — Lausanne.',
 }
 
-// Charger les véhicules visibles depuis le fichier JSON
-const VEHICLES = (vehiclesData as Vehicle[]).filter((v) => v.visible)
+// Force le rendu dynamique pour toujours lire les données fraîches du Blob Store
+export const dynamic = 'force-dynamic'
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SECTION 1 — HERO
@@ -60,7 +59,6 @@ function HeroVehicules() {
           <div className="flex flex-wrap gap-2">
             <Badge variant="blue">Toutes marques</Badge>
             <Badge variant="success" dot>En stock</Badge>
-            <Badge variant="grey">+ AutoScout24</Badge>
           </div>
         </div>
       </div>
@@ -72,60 +70,62 @@ function HeroVehicules() {
 // SECTION 2 — GRILLE VÉHICULES
 // ══════════════════════════════════════════════════════════════════════════════
 
-function VehiculesGrid() {
+function VehiculesGrid({ vehicles }: { vehicles: Awaited<ReturnType<typeof getVisibleVehicles>> }) {
   return (
     <section className="bg-white border-y border-border py-16 md:py-20">
       <div className="wrap">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
             <p className="text-eyebrow font-bold tracking-[0.15em] uppercase text-blue mb-2">
-              {VEHICLES.length} véhicules disponibles
+              {vehicles.length} véhicule{vehicles.length > 1 ? 's' : ''} disponible{vehicles.length > 1 ? 's' : ''}
             </p>
             <h2 className="font-display font-black text-h2 uppercase text-ink leading-none">
               Notre parc actuel
             </h2>
           </div>
-          <Button variant="ghost" as="a" href="https://www.autoscout24.ch" target="_blank">
-            Voir aussi sur AutoScout24 →
-          </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {VEHICLES.map((v) => {
-            // Construire le tableau d'images (rétro-compatibilité)
-            const vehicleImages = (v.images && v.images.length > 0)
-              ? v.images
-              : v.image
-                ? [v.image]
-                : []
+        {vehicles.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-ink-2 text-lg mb-2">Aucun véhicule disponible pour le moment.</p>
+            <p className="text-ink-2/60 text-sm">Revenez bientôt ou contactez-nous pour vos recherches.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map((v) => {
+              const vehicleImages = (v.images && v.images.length > 0)
+                ? v.images
+                : v.image
+                  ? [v.image]
+                  : []
 
-            return (
-              <VehicleCard
-                key={v.id}
-                make={v.make}
-                model={v.model}
-                year={v.year}
-                month={v.month}
-                km={v.km}
-                transmission={v.transmission}
-                fuel={v.fuel}
-                price={v.price}
-                description={v.description}
-                source={v.source}
-                images={vehicleImages}
-                imageSrc={v.image ?? undefined}
-                whatsappHref={waVehicleLink(v.make, v.model, v.year, v.km, v.price)}
-                emailHref={emailVehicleLink(v.make, v.model, v.year)}
-                badge={v.badge ? {
-                  variant: v.badgeVariant,
-                  dot: v.badgeVariant === 'success',
-                  label: v.badge,
-                } : undefined}
-                href={v.source === 'autoscout24' && v.autoscoutUrl ? v.autoscoutUrl : undefined}
-              />
-            )
-          })}
-        </div>
+              return (
+                <VehicleCard
+                  key={v.id}
+                  make={v.make}
+                  model={v.model}
+                  year={v.year}
+                  month={v.month}
+                  km={v.km}
+                  transmission={v.transmission}
+                  fuel={v.fuel}
+                  price={v.price}
+                  description={v.description}
+                  source={v.source}
+                  images={vehicleImages}
+                  imageSrc={v.image ?? undefined}
+                  whatsappHref={waVehicleLink(v.make, v.model, v.year, v.km, v.price)}
+                  emailHref={emailVehicleLink(v.make, v.model, v.year)}
+                  badge={v.badge ? {
+                    variant: v.badgeVariant,
+                    dot: v.badgeVariant === 'success',
+                    label: v.badge,
+                  } : undefined}
+                />
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )
@@ -290,11 +290,13 @@ function CtaBottom() {
 // PAGE VÉHICULES D'OCCASION
 // ══════════════════════════════════════════════════════════════════════════════
 
-export default function VehiculesOccasionPage() {
+export default async function VehiculesOccasionPage() {
+  const vehicles = await getVisibleVehicles()
+
   return (
     <>
       <HeroVehicules />
-      <VehiculesGrid />
+      <VehiculesGrid vehicles={vehicles} />
       <TripleDot />
       <ApprocheSection />
       <VenteSection />

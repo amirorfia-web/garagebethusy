@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { put, list } from '@vercel/blob'
+import { put } from '@vercel/blob'
 import type { Vehicle } from '@/data/vehicle-types'
+import { readVehicles } from '@/lib/vehicles'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,23 +14,6 @@ function checkAuth(request: NextRequest): boolean {
   if (!authHeader) return false
   const token = authHeader.replace('Bearer ', '')
   return token === ADMIN_PASSWORD
-}
-
-async function readVehicles(): Promise<Vehicle[]> {
-  try {
-    const { blobs } = await list({ prefix: BLOB_FILENAME })
-    if (blobs.length === 0) {
-      // Aucun blob encore — retourner vide (premier usage)
-      console.log('No vehicles.json blob found, starting fresh')
-      return []
-    }
-    const response = await fetch(blobs[0].url, { cache: 'no-store' })
-    const data = await response.json()
-    return data as Vehicle[]
-  } catch (err) {
-    console.error('readVehicles error:', err)
-    return []
-  }
 }
 
 async function writeVehicles(vehicles: Vehicle[]): Promise<void> {

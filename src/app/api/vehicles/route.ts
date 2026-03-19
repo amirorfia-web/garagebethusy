@@ -145,8 +145,9 @@ export async function PUT(request: NextRequest) {
 
     await writeVehicles(vehicles)
     return NextResponse.json(vehicles[index])
-  } catch {
-    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
+  } catch (err) {
+    console.error('PUT /api/vehicles error:', err)
+    return NextResponse.json({ error: `Erreur PUT: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })
   }
 }
 
@@ -158,7 +159,13 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { id, permanent, reason } = await request.json()
+    const body = await request.json()
+    const { id, permanent, reason } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID manquant' }, { status: 400 })
+    }
+
     const vehicles = await readVehicles()
 
     if (permanent) {
@@ -185,8 +192,9 @@ export async function DELETE(request: NextRequest) {
 
     await writeVehicles(vehicles)
     return NextResponse.json({ success: true, action: 'archived' })
-  } catch {
-    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
+  } catch (err) {
+    console.error('DELETE /api/vehicles error:', err)
+    return NextResponse.json({ error: `Erreur DELETE: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })
   }
 }
 
@@ -216,7 +224,8 @@ export async function PATCH(request: NextRequest) {
 
     await writeVehicles(vehicles)
     return NextResponse.json({ success: true, action: 'restored' })
-  } catch {
-    return NextResponse.json({ error: 'Donnees invalides' }, { status: 400 })
+  } catch (err) {
+    console.error('PATCH /api/vehicles error:', err)
+    return NextResponse.json({ error: `Erreur PATCH: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })
   }
 }

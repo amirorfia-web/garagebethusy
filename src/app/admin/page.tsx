@@ -922,6 +922,7 @@ export default function AdminPage() {
   const [permanentDeleteConfirm, setPermanentDeleteConfirm] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'vehicles' | 'archives'>('vehicles')
   const [toast, setToast] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -983,7 +984,8 @@ export default function AdminPage() {
   }
 
   const handleArchive = async (id: string, reason: 'vendu' | 'supprimé' | 'autre') => {
-    if (!password) return
+    if (!password || actionLoading) return
+    setActionLoading(id)
     try {
       const res = await fetch('/api/vehicles', {
         method: 'DELETE',
@@ -1006,6 +1008,8 @@ export default function AdminPage() {
       }
     } catch (err) {
       showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -1059,7 +1063,8 @@ export default function AdminPage() {
   }
 
   const handleToggleVisibility = async (vehicle: Vehicle) => {
-    if (!password) return
+    if (!password || actionLoading) return
+    setActionLoading(vehicle.id)
     try {
       const res = await fetch('/api/vehicles', {
         method: 'PUT',
@@ -1079,6 +1084,8 @@ export default function AdminPage() {
       }
     } catch (err) {
       showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -1234,7 +1241,8 @@ export default function AdminPage() {
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleToggleVisibility(v)}
-                      className="p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors"
+                      disabled={actionLoading === v.id}
+                      className={`p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors ${actionLoading === v.id ? 'opacity-40 cursor-wait' : ''}`}
                       title={v.visible ? 'Masquer' : 'Rendre visible'}
                     >
                       {v.visible ? (
@@ -1280,7 +1288,8 @@ export default function AdminPage() {
                     {/* Archiver — avec choix de raison */}
                     <button
                       onClick={() => { setArchiveModal(v.id); setArchiveReason('vendu') }}
-                      className="p-2 rounded-md hover:bg-amber-50 text-[#7D89A3] hover:text-amber-600 transition-colors"
+                      disabled={actionLoading === v.id}
+                      className={`p-2 rounded-md hover:bg-amber-50 text-[#7D89A3] hover:text-amber-600 transition-colors ${actionLoading === v.id ? 'opacity-40 cursor-wait' : ''}`}
                       title="Archiver"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>

@@ -111,21 +111,33 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
     }
 
-    const updatedImages: string[] = Array.isArray(body.images)
-      ? body.images.filter(Boolean)
-      : body.image
-        ? [body.image]
-        : vehicles[index].images ?? []
+    const existing = vehicles[index]
 
-    vehicles[index] = {
-      ...vehicles[index],
-      ...body,
-      year: Number(body.year ?? vehicles[index].year),
-      month: body.month != null && body.month !== '' ? Number(body.month) : (body.month === '' || body.month === null ? null : vehicles[index].month),
-      km: Number(body.km ?? vehicles[index].km),
-      price: Number(body.price ?? vehicles[index].price),
-      image: updatedImages[0] || null,
-      images: updatedImages,
+    // Mise à jour partielle : ne toucher que les champs envoyés
+    // Si seul { id, visible } est envoyé, on ne modifie que visible
+    const isPartialUpdate = Object.keys(body).length <= 3 // id + visible (+ éventuellement un autre)
+
+    if (isPartialUpdate && 'visible' in body && !('make' in body)) {
+      // Toggle visibilité uniquement
+      vehicles[index] = { ...existing, visible: body.visible }
+    } else {
+      // Mise à jour complète (formulaire d'édition)
+      const updatedImages: string[] = Array.isArray(body.images)
+        ? body.images.filter(Boolean)
+        : body.image
+          ? [body.image]
+          : existing.images ?? []
+
+      vehicles[index] = {
+        ...existing,
+        ...body,
+        year: Number(body.year ?? existing.year),
+        month: body.month != null && body.month !== '' ? Number(body.month) : (body.month === '' || body.month === null ? null : existing.month),
+        km: Number(body.km ?? existing.km),
+        price: Number(body.price ?? existing.price),
+        image: updatedImages[0] || null,
+        images: updatedImages,
+      }
     }
 
     await writeVehicles(vehicles)

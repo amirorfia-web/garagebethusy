@@ -924,9 +924,9 @@ export default function AdminPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(null), 3000)
+  const showToast = (msg: string, isError = false) => {
+    setToast(isError ? `❌ ${msg}` : msg)
+    setTimeout(() => setToast(null), isError ? 5000 : 3000)
   }
 
   const fetchVehicles = useCallback(async (pw: string) => {
@@ -955,135 +955,133 @@ export default function AdminPage() {
     setPassword(pw)
   }
 
+  // ── Helper API ───────────────────────────────────────────────────────────
+
+  const apiCall = async (
+    method: string,
+    body: Record<string, unknown>,
+    onSuccess: () => void,
+    successMsg: string,
+  ) => {
+    if (!password) return
+    const res = await fetch('/api/vehicles', {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${password}`,
+      },
+      body: JSON.stringify(body),
+    })
+    if (res.ok) {
+      showToast(successMsg)
+      onSuccess()
+      await fetchVehicles(password)
+    } else {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error || res.statusText)
+    }
+  }
+
+  // ── Ajouter / Modifier ──────────────────────────────────────────────────
+
   const handleSave = async (vehicleData: VehicleFormData) => {
     if (!password) return
     const isEditing = !!vehicleData.id
-
     try {
-      const res = await fetch('/api/vehicles', {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify(vehicleData),
-      })
-
-      if (res.ok) {
-        showToast(isEditing ? 'Véhicule modifié' : 'Véhicule ajouté')
-        setShowForm(false)
-        setEditingVehicle(null)
-        fetchVehicles(password)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        showToast(`Erreur: ${data.error || res.statusText}`)
-      }
+      await apiCall(
+        isEditing ? 'PUT' : 'POST',
+        vehicleData as unknown as Record<string, unknown>,
+        () => { setShowForm(false); setEditingVehicle(null) },
+        isEditing ? 'Véhicule modifié' : 'Véhicule ajouté',
+      )
     } catch (err) {
-      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+      showToast(err instanceof Error ? err.message : 'Erreur inconnue', true)
     }
   }
+
+  // ── Archiver ─────────────────────────────────────────────────────────────
 
   const handleArchive = async (id: string, reason: 'vendu' | 'supprimé' | 'autre') => {
     if (!password || actionLoading) return
     setActionLoading(id)
     try {
-      const res = await fetch('/api/vehicles', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify({ id, reason }),
-      })
-
-      if (res.ok) {
-        const label = reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé'
-        showToast(label)
-        setArchiveModal(null)
-        setDeleteConfirm(null)
-        fetchVehicles(password)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        showToast(`Erreur: ${data.error || res.statusText}`)
-      }
+      await apiCall(
+        'DELETE',
+        { id, reason },
+        () => { setArchiveModal(null); setDeleteConfirm(null) },
+        reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé',
+      )
     } catch (err) {
-      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+      showToast(err instanceof Error ? err.message : 'Erreur inconnue', true)
     } finally {
       setActionLoading(null)
     }
   }
 
-  const handleRestore = async (id: string) => {
-    if (!password) return
-    try {
-      const res = await fetch('/api/vehicles', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify({ id }),
-      })
+  // ── Restaurer ────────────────────────────────────────────────────────────
 
-      if (res.ok) {
-        showToast('Véhicule restauré (masqué par défaut)')
-        fetchVehicles(password)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        showToast(`Erreur: ${data.error || res.statusText}`)
-      }
+  const handleRestore = async (id: string) => {
+    if (!password || actionLoading) return
+    setActionLoading(id)
+    try {
+      await apiCall(
+        'PATCH',
+        { id },
+        () => {},
+        'Véhicule restauré (masqué par défaut)',
+      )
     } catch (err) {
-      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+      showToast(err instanceof Error ? err.message : 'Erreur inconnue', true)
+    } finally {
+      setActionLoading(null)
     }
   }
+
+  // ── Supprimer définitivement ─────────────────────────────────────────────
 
   const handlePermanentDelete = async (id: string) => {
-    if (!password) return
+    if (!password || actionLoading) return
+    setActionLoading(id)
     try {
-      const res = await fetch('/api/vehicles', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify({ id, permanent: true }),
-      })
-
-      if (res.ok) {
-        showToast('Véhicule supprimé définitivement')
-        setPermanentDeleteConfirm(null)
-        fetchVehicles(password)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        showToast(`Erreur: ${data.error || res.statusText}`)
-      }
+      await apiCall(
+        'DELETE',
+        { id, permanent: true },
+        () => { setPermanentDeleteConfirm(null) },
+        'Véhicule supprimé définitivement',
+      )
     } catch (err) {
-      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+      showToast(err instanceof Error ? err.message : 'Erreur inconnue', true)
+    } finally {
+      setActionLoading(null)
     }
   }
+
+  // ── Masquer / Rendre visible ─────────────────────────────────────────────
 
   const handleToggleVisibility = async (vehicle: Vehicle) => {
     if (!password || actionLoading) return
     setActionLoading(vehicle.id)
-    try {
-      const res = await fetch('/api/vehicles', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${password}`,
-        },
-        body: JSON.stringify({ ...vehicle, visible: !vehicle.visible }),
-      })
 
-      if (res.ok) {
-        showToast(vehicle.visible ? 'Véhicule masqué' : 'Véhicule rendu visible')
-        fetchVehicles(password)
-      } else {
-        const data = await res.json().catch(() => ({}))
-        showToast(`Erreur: ${data.error || res.statusText}`)
-      }
+    // UI optimiste : on toggle immédiatement dans le state local
+    const newVisible = !vehicle.visible
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicle.id ? { ...v, visible: newVisible } : v))
+    )
+
+    try {
+      // N'envoyer QUE l'id et le champ visible — pas tout l'objet
+      await apiCall(
+        'PUT',
+        { id: vehicle.id, visible: newVisible },
+        () => {},
+        newVisible ? 'Véhicule rendu visible' : 'Véhicule masqué',
+      )
     } catch (err) {
-      showToast(`Erreur réseau: ${err instanceof Error ? err.message : 'inconnue'}`)
+      // Rollback si erreur
+      setVehicles((prev) =>
+        prev.map((v) => (v.id === vehicle.id ? { ...v, visible: vehicle.visible } : v))
+      )
+      showToast(err instanceof Error ? err.message : 'Erreur inconnue', true)
     } finally {
       setActionLoading(null)
     }
@@ -1106,7 +1104,9 @@ export default function AdminPage() {
     <div className="fixed inset-0 z-[200] bg-[#F8F9FC] overflow-auto">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-[100] bg-[#0E9F6E] text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg animate-fade-up">
+        <div className={`fixed top-4 right-4 z-[100] text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-lg animate-fade-up ${
+          toast.startsWith('❌') ? 'bg-red-600' : 'bg-[#0E9F6E]'
+        }`}>
           {toast}
         </div>
       )}
@@ -1371,11 +1371,12 @@ export default function AdminPage() {
                     {/* Restaurer */}
                     <button
                       onClick={() => handleRestore(v.id)}
-                      className="text-xs font-semibold text-[#1649C8] bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1"
+                      disabled={actionLoading === v.id}
+                      className={`text-xs font-semibold text-[#1649C8] bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1 ${actionLoading === v.id ? 'opacity-50 cursor-wait' : ''}`}
                       title="Restaurer le véhicule"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-                      Restaurer
+                      {actionLoading === v.id ? 'En cours...' : 'Restaurer'}
                     </button>
 
                     {/* Supprimer définitivement */}
@@ -1383,12 +1384,14 @@ export default function AdminPage() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handlePermanentDelete(v.id)}
-                          className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1.5 rounded hover:bg-red-100 transition-colors"
+                          disabled={actionLoading === v.id}
+                          className={`text-xs font-bold text-red-600 bg-red-50 px-2 py-1.5 rounded hover:bg-red-100 transition-colors ${actionLoading === v.id ? 'opacity-50 cursor-wait' : ''}`}
                         >
-                          Supprimer
+                          {actionLoading === v.id ? 'Suppression...' : 'Supprimer'}
                         </button>
                         <button
                           onClick={() => setPermanentDeleteConfirm(null)}
+                          disabled={actionLoading === v.id}
                           className="text-xs text-[#7D89A3] px-2 py-1.5 rounded hover:bg-[#F8F9FC] transition-colors"
                         >
                           Annuler
@@ -1397,7 +1400,8 @@ export default function AdminPage() {
                     ) : (
                       <button
                         onClick={() => setPermanentDeleteConfirm(v.id)}
-                        className="p-2 rounded-md hover:bg-red-50 text-[#7D89A3] hover:text-red-600 transition-colors"
+                        disabled={!!actionLoading}
+                        className={`p-2 rounded-md hover:bg-red-50 text-[#7D89A3] hover:text-red-600 transition-colors ${actionLoading ? 'opacity-40' : ''}`}
                         title="Supprimer définitivement"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
@@ -1444,12 +1448,14 @@ export default function AdminPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => handleArchive(archiveModal, archiveReason)}
-                className="flex-1 bg-amber-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-amber-600 transition-colors"
+                disabled={!!actionLoading}
+                className={`flex-1 bg-amber-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-amber-600 transition-colors ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
               >
-                Archiver
+                {actionLoading ? 'Archivage...' : 'Archiver'}
               </button>
               <button
                 onClick={() => setArchiveModal(null)}
+                disabled={!!actionLoading}
                 className="px-6 border border-[#DDE3F0] text-[#3D4A66] font-medium text-sm py-2.5 rounded-lg hover:bg-[#F8F9FC] transition-colors"
               >
                 Annuler

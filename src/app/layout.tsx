@@ -104,8 +104,8 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Garage de Béthusy-Beaumont — Mécanique & Carrosserie à Lausanne depuis 2006',
-    template: '%s | Garage Béthusy-Beaumont',
+    default: 'Garage Béthusy - AFGP Sàrl — Mécanique & Carrosserie à Lausanne depuis 2006',
+    template: '%s | Garage Béthusy - AFGP Sàrl',
   },
   description:
     "Garage indépendant à Lausanne, toutes marques. Mécanique, carrosserie, pneus, vitrage. Devis transparent, délais tenus. AFGP Sàrl — Avenue de Béthusy 27.",
@@ -119,7 +119,7 @@ export const metadata: Metadata = {
     'Béthusy',
   ],
   openGraph: {
-    siteName: 'Garage de Béthusy-Beaumont',
+    siteName: 'Garage Béthusy - AFGP Sàrl',
     locale: 'fr_CH',
     type: 'website',
   },

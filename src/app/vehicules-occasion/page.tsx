@@ -12,7 +12,7 @@ import { StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 export const metadata: Metadata = {
   title: 'Véhicules d\'occasion — Achat & Vente · Lausanne',
   description:
-    'Véhicules d\'occasion contrôlés et préparés par notre garage. Toutes marques, prix transparents. Garage de Béthusy-Beaumont, AFGP Sàrl — Lausanne.',
+    'Véhicules d\'occasion contrôlés et préparés par notre garage. Toutes marques, prix transparents. Garage de Béthusy - AFGP Sàrl, AFGP Sàrl — Lausanne.',
 }
 
 // Force le rendu dynamique pour toujours lire les données fraîches du Blob Store

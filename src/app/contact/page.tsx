@@ -9,7 +9,7 @@ import { RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/
 export const metadata: Metadata = {
   title: 'Contact — Devis, Rendez-vous & WhatsApp · Lausanne',
   description:
-    'Contactez le Garage de Béthusy-Beaumont à Lausanne. Formulaire, WhatsApp direct avec les associés, horaires et adresse.',
+    'Contactez le Garage de Béthusy - AFGP Sàrl à Lausanne. Formulaire, WhatsApp direct avec les associés, horaires et adresse.',
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -83,7 +83,7 @@ function InfosSection() {
               <div className="flex items-start gap-3 mb-3">
                 <MapPin size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
                 <div>
-                  <p className="text-[0.95rem] font-semibold text-ink">Garage de Béthusy-Beaumont</p>
+                  <p className="text-[0.95rem] font-semibold text-ink">Garage de Béthusy - AFGP Sàrl</p>
                   <p className="text-[0.88rem] text-ink-2">Avenue de Béthusy 27 · 1005 Lausanne</p>
                 </div>
               </div>
@@ -143,7 +143,7 @@ function InfosSection() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Localisation du Garage de Béthusy-Beaumont"
+                title="Localisation du Garage de Béthusy - AFGP Sàrl"
               />
             </div>
             <Button variant="ghost" as="a" href="https://www.google.com/maps/search/?api=1&query=Avenue+de+Béthusy+27+1005+Lausanne" target="_blank">

@@ -9,7 +9,7 @@ import { Wrench, Paintbrush, CircleDot, Shield, Warehouse, PhoneCall, Building2,
 export const metadata: Metadata = {
   title: 'Nos prestations — Mécanique, Carrosserie, Pneus & Vitrage · Lausanne',
   description:
-    'Révision, freins, distribution, carrosserie, peinture, pneus, pare-brise — toutes marques à Lausanne. Devis gratuit. Garage de Béthusy-Beaumont, AFGP Sàrl.',
+    'Révision, freins, distribution, carrosserie, peinture, pneus, pare-brise — toutes marques à Lausanne. Devis gratuit. Garage de Béthusy - AFGP Sàrl, AFGP Sàrl.',
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const GARAGE = {
-  name: 'Garage de Béthusy-Beaumont',
+  name: 'Garage Béthusy - AFGP Sàrl',
   company: 'AFGP Sàrl',
   address: 'Avenue de Béthusy 27',
   city: '1005 Lausanne',

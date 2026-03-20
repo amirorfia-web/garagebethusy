@@ -19,7 +19,7 @@ import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from
 const PREVIEW_VEHICLES = (vehiclesData as Vehicle[]).filter((v) => v.visible).slice(0, 3)
 
 export const metadata: Metadata = {
-  title: 'Garage de Béthusy-Beaumont — Mécanique & Carrosserie à Lausanne depuis 2006',
+  title: 'Garage Béthusy - AFGP Sàrl — Mécanique & Carrosserie à Lausanne depuis 2006',
   description:
     'Garage indépendant à Lausanne, toutes marques. Mécanique, carrosserie, pneus, vitrage. Devis transparent, délais tenus. AFGP Sàrl — Avenue de Béthusy 27.',
 }
@@ -92,7 +92,7 @@ function HeroSection() {
             <div className="relative aspect-[4/3] w-full rounded-xl shadow-lg overflow-hidden">
               <Image
                 src="/images/exterieur.png"
-                alt="Façade du Garage de Béthusy-Beaumont — Avenue de Béthusy 27, Lausanne"
+                alt="Façade du Garage Béthusy - AFGP Sàrl — Avenue de Béthusy 27, Lausanne"
                 fill
                 className="object-cover"
                 priority
@@ -156,7 +156,7 @@ function IntroSection() {
           </h2>
           <div className="space-y-4 text-body text-ink-2 leading-[1.7]">
             <p>
-              Fondé en 2006, le Garage de Béthusy-Beaumont s&apos;est construit sur une seule chose : un travail bien fait, annoncé clairement, livré dans les temps.
+              Fondé en 2006, le Garage Béthusy - AFGP Sàrl s&apos;est construit sur une seule chose : un travail bien fait, annoncé clairement, livré dans les temps.
             </p>
             <p>
               Chez nous, le diagnostic est honnête. Si la réparation n&apos;est pas nécessaire, on vous le dit. Si elle l&apos;est, on vous explique pourquoi — et on vous donne un prix ferme avant de commencer.

@@ -58,7 +58,7 @@ function HeroAPropos() {
           <div className="relative aspect-[4/3] w-full rounded-xl shadow-lg overflow-hidden">
             <Image
               src="/images/equipe.png"
-              alt="Les trois associés du Garage de Béthusy-Beaumont"
+              alt="Les trois associés du Garage de Béthusy - AFGP Sàrl"
               fill
               className="object-cover"
               priority
@@ -85,7 +85,7 @@ function HistoireSection() {
             <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden">
               <Image
                 src="/images/interieur-1.webp"
-                alt="L'atelier du Garage de Béthusy-Beaumont — vue intérieure"
+                alt="L'atelier du Garage de Béthusy - AFGP Sàrl — vue intérieure"
                 fill
                 className="object-cover"
                 sizes="(min-width: 768px) 50vw, 100vw"
@@ -155,15 +155,7 @@ const TEAM_PAGE_DATA: { description: string[]; imageSrc: string; imageAlt: strin
       'Vingt ans plus tard, c\'est toujours la même exigence — et c\'est lui qui la porte chaque matin.',
     ],
     imageSrc: '/images/alex.png',
-    imageAlt: 'Alessandro — Fondateur du Garage de Béthusy-Beaumont',
-  },
-  {
-    description: [
-      'Valon a commencé ici comme apprenti. Il connaît ce garage mieux que la plupart des bâtiments qu\'il a traversés. Son domaine de prédilection : la mécanique fine, les diagnostics complexes, les problèmes que les autres n\'arrivent pas à identifier.',
-      'Ce n\'est pas lui qui fera semblant d\'avoir trouvé si ce n\'est pas le cas.',
-    ],
-    imageSrc: '/images/valon.png',
-    imageAlt: 'Valon — Associé du Garage de Béthusy-Beaumont',
+    imageAlt: 'Alessandro — Fondateur du Garage de Béthusy - AFGP Sàrl',
   },
   {
     description: [
@@ -171,7 +163,15 @@ const TEAM_PAGE_DATA: { description: string[]; imageSrc: string; imageAlt: strin
       'Il n\'expédie pas. Il fait.',
     ],
     imageSrc: '/images/brah.png',
-    imageAlt: 'Brah — Associé du Garage de Béthusy-Beaumont',
+    imageAlt: 'Brah — Associé du Garage Béthusy - AFGP Sàrl',
+  },
+  {
+    description: [
+      'Valon a commencé ici comme apprenti. Il connaît ce garage mieux que la plupart des bâtiments qu\'il a traversés. Son domaine de prédilection : la mécanique fine, les diagnostics complexes, les problèmes que les autres n\'arrivent pas à identifier.',
+      'Ce n\'est pas lui qui fera semblant d\'avoir trouvé si ce n\'est pas le cas.',
+    ],
+    imageSrc: '/images/valon.png',
+    imageAlt: 'Valon — Associé du Garage Béthusy - AFGP Sàrl',
   },
 ]
 
@@ -339,7 +339,7 @@ function GarageSection() {
             <div className="flex items-start gap-3">
               <MapPin size={20} className="text-blue shrink-0 mt-0.5" strokeWidth={1.8} />
               <div>
-                <p className="text-[0.88rem] font-semibold text-ink">Garage de Béthusy-Beaumont</p>
+                <p className="text-[0.88rem] font-semibold text-ink">Garage de Béthusy - AFGP Sàrl</p>
                 <p className="text-[0.82rem] text-ink-2">Avenue de Béthusy 27 · 1005 Lausanne</p>
               </div>
             </div>
@@ -365,7 +365,7 @@ function GarageSection() {
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="Localisation du Garage de Béthusy-Beaumont — Avenue de Béthusy 27, 1005 Lausanne"
+            title="Localisation du Garage de Béthusy - AFGP Sàrl — Avenue de Béthusy 27, 1005 Lausanne"
           />
         </div>
         </RevealRight>

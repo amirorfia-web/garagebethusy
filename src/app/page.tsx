@@ -10,13 +10,13 @@ import StatStrip from '@/components/ui/StatStrip'
 import { FloatingPaths } from '@/components/ui/BackgroundPaths'
 import { StarRating } from '@/components/ui/Icons'
 import type { Vehicle } from '@/data/vehicle-types'
-import vehiclesData from '@/data/vehicles.json'
+import { getVisibleVehicles } from '@/lib/vehicles'
 import { TEAM, GARAGE, waLink, phoneLink } from '@/data/contacts'
 import { TrustBand } from '@/components/ui/SectionDivider'
 import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
-// 3 premiers véhicules visibles pour l'aperçu
-const PREVIEW_VEHICLES = (vehiclesData as Vehicle[]).filter((v) => v.visible).slice(0, 3)
+// Force le rendu dynamique pour toujours lire les données fraîches du Blob Store
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Garage Béthusy - AFGP Sàrl — Mécanique & Carrosserie à Lausanne depuis 2006',
@@ -366,7 +366,9 @@ function CtaContactBand() {
 // SECTION 7 — APERÇU VÉHICULES D'OCCASION
 // ══════════════════════════════════════════════════════════════════════════════
 
-function VehiclesPreview() {
+function VehiclesPreview({ vehicles }: { vehicles: Vehicle[] }) {
+  if (vehicles.length === 0) return null
+
   return (
     <section className="wrap py-16 md:py-20">
       {/* En-tête */}
@@ -382,29 +384,37 @@ function VehiclesPreview() {
         </p>
       </div>
 
-      {/* Cards véhicules — depuis le JSON */}
+      {/* Cards véhicules — depuis le Blob Store */}
       <StaggerGrid className="card-grid-3 mb-10">
-        {PREVIEW_VEHICLES.map((v) => (
-          <StaggerCard key={v.id}>
-            <VehicleCard
-              make={v.make}
-              model={v.model}
-              year={v.year}
-              km={v.km}
-              transmission={v.transmission}
-              fuel={v.fuel}
-              price={v.price}
-              source={v.source}
-              imageSrc={v.image ?? undefined}
-              badge={v.badge ? {
-                variant: v.badgeVariant,
-                dot: v.badgeVariant === 'success',
-                label: v.badge,
-              } : undefined}
-              href={v.source === 'autoscout24' && v.autoscoutUrl ? v.autoscoutUrl : undefined}
-            />
-          </StaggerCard>
-        ))}
+        {vehicles.map((v) => {
+          const vehicleImages = (v.images && v.images.length > 0)
+            ? v.images
+            : v.image
+              ? [v.image]
+              : []
+
+          return (
+            <StaggerCard key={v.id}>
+              <VehicleCard
+                make={v.make}
+                model={v.model}
+                year={v.year}
+                km={v.km}
+                transmission={v.transmission}
+                fuel={v.fuel}
+                price={v.price}
+                source={v.source}
+                images={vehicleImages}
+                imageSrc={v.image ?? undefined}
+                badge={v.badge ? {
+                  variant: v.badgeVariant,
+                  dot: v.badgeVariant === 'success',
+                  label: v.badge,
+                } : undefined}
+              />
+            </StaggerCard>
+          )
+        })}
       </StaggerGrid>
 
       <div className="text-center">
@@ -420,7 +430,10 @@ function VehiclesPreview() {
 // PAGE ACCUEIL
 // ══════════════════════════════════════════════════════════════════════════════
 
-export default function HomePage() {
+export default async function HomePage() {
+  const vehicles = await getVisibleVehicles()
+  const previewVehicles = vehicles.slice(0, 3)
+
   return (
     <>
       <HeroSection />
@@ -430,7 +443,7 @@ export default function HomePage() {
       <TrustBand />
       <TestimonialsSection />
       <CtaContactBand />
-      <VehiclesPreview />
+      <VehiclesPreview vehicles={previewVehicles} />
     </>
   )
 }

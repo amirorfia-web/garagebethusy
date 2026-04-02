@@ -1312,11 +1312,13 @@ export default function AdminPage() {
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleToggleVisibility(v)}
-                      disabled={actionLoading === v.id}
-                      className={`p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors ${actionLoading === v.id ? 'opacity-40 cursor-wait' : ''}`}
+                      disabled={!!actionLoading}
+                      className={`p-2 rounded-md hover:bg-[#F8F9FC] text-[#7D89A3] hover:text-[#080F28] transition-colors ${actionLoading === v.id ? 'animate-pulse' : ''} ${actionLoading && actionLoading !== v.id ? 'opacity-30' : ''}`}
                       title={v.visible ? 'Masquer' : 'Rendre visible'}
                     >
-                      {v.visible ? (
+                      {actionLoading === v.id ? (
+                        <div className="w-4 h-4 border-2 border-[#1649C8] border-t-transparent rounded-full animate-spin" />
+                      ) : v.visible ? (
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                       ) : (
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -1359,8 +1361,8 @@ export default function AdminPage() {
                     {/* Archiver — avec choix de raison */}
                     <button
                       onClick={() => { setArchiveModal(v.id); setArchiveReason('vendu') }}
-                      disabled={actionLoading === v.id}
-                      className={`p-2 rounded-md hover:bg-amber-50 text-[#7D89A3] hover:text-amber-600 transition-colors ${actionLoading === v.id ? 'opacity-40 cursor-wait' : ''}`}
+                      disabled={!!actionLoading}
+                      className={`p-2 rounded-md hover:bg-amber-50 text-[#7D89A3] hover:text-amber-600 transition-colors ${actionLoading && actionLoading !== v.id ? 'opacity-30' : ''}`}
                       title="Archiver"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
@@ -1442,12 +1444,21 @@ export default function AdminPage() {
                     {/* Restaurer */}
                     <button
                       onClick={() => handleRestore(v.id)}
-                      disabled={actionLoading === v.id}
-                      className={`text-xs font-semibold text-[#1649C8] bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1 ${actionLoading === v.id ? 'opacity-50 cursor-wait' : ''}`}
+                      disabled={!!actionLoading}
+                      className={`text-xs font-semibold text-[#1649C8] bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1.5 min-w-[100px] justify-center ${actionLoading === v.id ? '' : ''} ${actionLoading && actionLoading !== v.id ? 'opacity-30' : ''}`}
                       title="Restaurer le véhicule"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-                      {actionLoading === v.id ? 'En cours...' : 'Restaurer'}
+                      {actionLoading === v.id ? (
+                        <>
+                          <div className="w-3 h-3 border-2 border-[#1649C8] border-t-transparent rounded-full animate-spin" />
+                          Restauration...
+                        </>
+                      ) : (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                          Restaurer
+                        </>
+                      )}
                     </button>
 
                     {/* Supprimer définitivement */}
@@ -1520,9 +1531,14 @@ export default function AdminPage() {
               <button
                 onClick={() => handleArchive(archiveModal, archiveReason)}
                 disabled={!!actionLoading}
-                className={`flex-1 bg-amber-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-amber-600 transition-colors ${actionLoading ? 'opacity-50 cursor-wait' : ''}`}
+                className={`flex-1 bg-amber-500 text-white font-bold text-sm py-2.5 rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 ${actionLoading ? 'opacity-80' : ''}`}
               >
-                {actionLoading ? 'Archivage...' : 'Archiver'}
+                {actionLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Archivage en cours...
+                  </>
+                ) : 'Archiver'}
               </button>
               <button
                 onClick={() => setArchiveModal(null)}

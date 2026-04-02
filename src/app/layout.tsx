@@ -3,9 +3,12 @@ import Script from 'next/script'
 import { Barlow_Condensed, DM_Sans } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import CookieConsent from '@/components/CookieConsent'
 import { GARAGE } from '@/data/contacts'
 // WhatsApp sticky supprimé — pas de numéro général unique
 import './globals.css'
+
+const GA_ID = 'G-HF43RKDHTB'
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -83,8 +86,6 @@ const jsonLd = {
   },
   sameAs: [GARAGE.googleReviewsUrl],
 }
-
-const GA_ID = 'G-HF43RKDHTB'
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],

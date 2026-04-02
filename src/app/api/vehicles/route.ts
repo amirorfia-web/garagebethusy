@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { put } from '@vercel/blob'
 import type { Vehicle } from '@/data/vehicle-types'
-import { readVehicles } from '@/lib/vehicles'
+import { readVehicles, invalidateVehiclesCache } from '@/lib/vehicles'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,12 +17,14 @@ function checkAuth(request: NextRequest): boolean {
 }
 
 async function writeVehicles(vehicles: Vehicle[]): Promise<void> {
-  await put(BLOB_FILENAME, JSON.stringify(vehicles, null, 2), {
+  const blob = await put(BLOB_FILENAME, JSON.stringify(vehicles, null, 2), {
     access: 'public',
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: 'application/json',
   })
+  // Invalider le cache pour que le prochain read utilise la nouvelle URL
+  invalidateVehiclesCache()
 }
 
 function generateId(make: string, model: string, year: number): string {
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
     vehicles.unshift(newVehicle)
     await writeVehicles(vehicles)
 
-    return NextResponse.json(newVehicle, { status: 201 })
+    return NextResponse.json({ vehicle: newVehicle, vehicles }, { status: 201 })
   } catch (err) {
     console.error('POST /api/vehicles error:', err)
     return NextResponse.json({ error: `Erreur: ${err instanceof Error ? err.message : 'inconnue'}` }, { status: 500 })
@@ -141,7 +143,7 @@ export async function PUT(request: NextRequest) {
     }
 
     await writeVehicles(vehicles)
-    return NextResponse.json(vehicles[index])
+    return NextResponse.json({ vehicle: vehicles[index], vehicles })
   } catch (err) {
     console.error('PUT /api/vehicles error:', err)
     return NextResponse.json({ error: `Erreur PUT: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })
@@ -171,7 +173,7 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Vehicule introuvable' }, { status: 404 })
       }
       await writeVehicles(filtered)
-      return NextResponse.json({ success: true, action: 'deleted' })
+      return NextResponse.json({ success: true, action: 'deleted', vehicles: filtered })
     }
 
     const index = vehicles.findIndex((v) => v.id === id)
@@ -188,7 +190,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await writeVehicles(vehicles)
-    return NextResponse.json({ success: true, action: 'archived' })
+    return NextResponse.json({ success: true, action: 'archived', vehicles })
   } catch (err) {
     console.error('DELETE /api/vehicles error:', err)
     return NextResponse.json({ error: `Erreur DELETE: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })
@@ -220,7 +222,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await writeVehicles(vehicles)
-    return NextResponse.json({ success: true, action: 'restored' })
+    return NextResponse.json({ success: true, action: 'restored', vehicles })
   } catch (err) {
     console.error('PATCH /api/vehicles error:', err)
     return NextResponse.json({ error: `Erreur PATCH: ${err instanceof Error ? err.message : String(err)}` }, { status: 400 })

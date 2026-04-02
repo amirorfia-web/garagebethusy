@@ -1033,9 +1033,13 @@ export default function AdminPage() {
       body: JSON.stringify(body),
     })
     if (res.ok) {
+      const data = await res.json()
       showToast(successMsg)
       onSuccess()
-      await fetchVehicles(password)
+      // Utiliser la liste retournée par l'API au lieu de re-fetcher
+      if (data.vehicles) {
+        setVehicles(data.vehicles)
+      }
     } else {
       const data = await res.json().catch(() => ({}))
       throw new Error(data.error || res.statusText)

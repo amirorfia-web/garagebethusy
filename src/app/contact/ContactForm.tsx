@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import FormInput from '@/components/ui/FormInput'
 import FormSelect from '@/components/ui/FormSelect'
 import FormTextarea from '@/components/ui/FormTextarea'
@@ -157,14 +158,29 @@ export default function ContactForm() {
           </div>
         )}
 
+        {/* Consentement données personnelles */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="consentement"
+            required
+            className="mt-0.5 h-4 w-4 rounded border-border text-blue focus:ring-blue accent-blue"
+          />
+          <span className="text-[0.78rem] text-ink-2 leading-[1.6]">
+            J&apos;accepte que mes donn&eacute;es soient utilis&eacute;es pour r&eacute;pondre &agrave; ma demande,
+            conform&eacute;ment &agrave; la{' '}
+            <Link href="/politique-confidentialite" className="text-blue hover:underline" target="_blank">
+              politique de confidentialit&eacute;
+            </Link>.
+            Aucun d&eacute;marchage commercial.
+          </span>
+        </label>
+
         {/* Submit */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
           <Button variant="primary" size="lg" disabled={sending}>
             {sending ? 'Envoi en cours…' : 'Envoyer'}
           </Button>
-          <p className="text-[0.72rem] text-ink-3 leading-[1.5]">
-            Vos données sont utilisées uniquement pour vous répondre. Aucun démarchage commercial.
-          </p>
         </div>
       </div>
     </form>

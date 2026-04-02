@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import { Barlow_Condensed, DM_Sans } from 'next/font/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -7,8 +6,6 @@ import CookieConsent from '@/components/CookieConsent'
 import { GARAGE } from '@/data/contacts'
 // WhatsApp sticky supprimé — pas de numéro général unique
 import './globals.css'
-
-const GA_ID = 'G-HF43RKDHTB'
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -143,15 +140,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}
-        </Script>
+        <CookieConsent />
       </body>
     </html>
   )

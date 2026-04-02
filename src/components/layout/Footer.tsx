@@ -134,9 +134,18 @@ export default function Footer() {
           <p className="text-[0.72rem] text-white/30 text-center sm:text-left">
             © 2026 {GARAGE.company} — {GARAGE.name} · {GARAGE.address} · {GARAGE.city}
           </p>
-          <p className="text-[0.65rem] text-white/20">
-            Site par Ora Pulse
-          </p>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/politique-confidentialite"
+              className="text-[0.65rem] text-white/30 hover:text-white/60 transition-colors"
+            >
+              Politique de confidentialit&eacute;
+            </Link>
+            <span className="text-white/10">|</span>
+            <p className="text-[0.65rem] text-white/20">
+              Site par Ora Pulse
+            </p>
+          </div>
         </div>
       </div>
     </footer>

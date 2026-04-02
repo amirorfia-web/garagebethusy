@@ -381,7 +381,17 @@ const MAKE_MAPPINGS: Record<string, string> = {
  * Example URL: https://www.autoscout24.ch/fr/d/volvo-xc90-20-t8-te-ultra-dark-eawd-12876739
  * → make: "Volvo", model: "XC90 2.0 T8 TE Ultra Dark eAWD"
  */
-function parseAutoScoutUrl(url: string): { make: string; model: string } | null {
+/** Detect fuel type from model slug keywords */
+function detectFuelFromSlug(model: string): string | null {
+  const lower = model.toLowerCase()
+  if (/\btdi\b/.test(lower) || /\bdiesel\b/.test(lower) || /\bcdi\b/.test(lower) || /\bhdi\b/.test(lower) || /\bdci\b/.test(lower) || /\bblue\s?tec\b/.test(lower) || /\bjtd\b/.test(lower)) return 'Diesel'
+  if (/\be-tron\b/.test(lower) || /\bev\b/.test(lower) || /\b(id\.\d)\b/.test(lower) || /\belectric\b/.test(lower)) return 'Électrique'
+  if (/\bhybrid\b/.test(lower) || /\bphev\b/.test(lower) || /\bt8\b.*\bte\b/.test(lower)) return 'Hybride'
+  if (/\btsi\b/.test(lower) || /\btfsi\b/.test(lower) || /\bgti\b/.test(lower) || /\bturbo\b/.test(lower)) return 'Essence'
+  return null
+}
+
+function parseAutoScoutUrl(url: string): { make: string; model: string; fuelHint: string | null } | null {
   try {
     const u = new URL(url)
     if (!u.hostname.includes('autoscout24')) return null
@@ -425,7 +435,8 @@ function parseAutoScoutUrl(url: string): { make: string; model: string } | null 
       })
       .join(' ')
 
-    return { make, model }
+    const fuelHint = detectFuelFromSlug(model)
+    return { make, model, fuelHint }
   } catch {
     return null
   }
@@ -619,7 +630,7 @@ function VehicleForm({ vehicle, password, onSave, onCancel, isEditing }: Vehicle
         month: textData.month ?? prev.month,
         km: textData.km || prev.km,
         price: textData.price || prev.price,
-        fuel: textData.fuel || prev.fuel,
+        fuel: textData.fuel || urlData.fuelHint || prev.fuel,
         transmission: textData.transmission || prev.transmission,
         images: downloadedImages.length > 0 ? [...prev.images, ...downloadedImages] : prev.images,
         image: downloadedImages.length > 0 ? downloadedImages[0] : prev.image,
@@ -635,9 +646,58 @@ function VehicleForm({ vehicle, password, onSave, onCancel, isEditing }: Vehicle
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [savingImages, setSavingImages] = useState(false)
+
+  const downloadExternalImages = async (): Promise<string[]> => {
+    const results: string[] = []
+    for (const img of form.images) {
+      if (img.includes('.blob.vercel-storage.com') || img.startsWith('/')) {
+        results.push(img)
+        continue
+      }
+      // External URL — download to Blob Store
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${password}`,
+          },
+          body: JSON.stringify({ url: img }),
+        })
+        const data = await res.json()
+        if (res.ok && data.url) {
+          results.push(data.url)
+        } else {
+          results.push(img) // Keep original if download fails
+        }
+      } catch {
+        results.push(img) // Keep original if download fails
+      }
+    }
+    return results
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(form)
+
+    // Check for external images and download them to Blob Store
+    const hasExternalImages = form.images.some(
+      (img) => !img.includes('.blob.vercel-storage.com') && !img.startsWith('/')
+    )
+
+    if (hasExternalImages) {
+      setSavingImages(true)
+      try {
+        const blobImages = await downloadExternalImages()
+        const updatedForm = { ...form, images: blobImages, image: blobImages[0] || '' }
+        onSave(updatedForm)
+      } finally {
+        setSavingImages(false)
+      }
+    } else {
+      onSave(form)
+    }
   }
 
   const inputCls = 'w-full border border-[#DDE3F0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1649C8]/20 focus:border-[#1649C8]'
@@ -888,9 +948,10 @@ function VehicleForm({ vehicle, password, onSave, onCancel, isEditing }: Vehicle
         <div className="flex gap-3 pt-4 border-t border-[#DDE3F0]">
           <button
             type="submit"
-            className="flex-1 bg-[#1649C8] text-white font-bold text-sm py-2.5 rounded-lg hover:bg-[#0D2E8F] transition-colors"
+            disabled={savingImages}
+            className="flex-1 bg-[#1649C8] text-white font-bold text-sm py-2.5 rounded-lg hover:bg-[#0D2E8F] transition-colors disabled:opacity-60"
           >
-            {isEditing ? 'Enregistrer' : 'Ajouter le véhicule'}
+            {savingImages ? 'Téléchargement des images...' : isEditing ? 'Enregistrer' : 'Ajouter le véhicule'}
           </button>
           <button
             type="button"
@@ -916,7 +977,6 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingVehicle, setEditingVehicle] = useState<(VehicleFormData) | null>(null)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [archiveModal, setArchiveModal] = useState<string | null>(null)
   const [archiveReason, setArchiveReason] = useState<'vendu' | 'supprimé' | 'autre'>('vendu')
   const [permanentDeleteConfirm, setPermanentDeleteConfirm] = useState<string | null>(null)
@@ -1008,7 +1068,7 @@ export default function AdminPage() {
       await apiCall(
         'DELETE',
         { id, reason },
-        () => { setArchiveModal(null); setDeleteConfirm(null) },
+        () => { setArchiveModal(null) },
         reason === 'vendu' ? 'Véhicule archivé (vendu)' : 'Véhicule archivé',
       )
     } catch (err) {
@@ -1138,6 +1198,13 @@ export default function AdminPage() {
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
               Ajouter
+            </button>
+            <button
+              onClick={() => { setPassword(null); setVehicles([]) }}
+              className="text-xs font-medium text-[#7D89A3] hover:text-red-600 px-2 py-2 transition-colors"
+              title="Déconnexion"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
           </div>
         </div>

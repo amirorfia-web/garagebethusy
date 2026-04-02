@@ -11,7 +11,7 @@ import { FloatingPaths } from '@/components/ui/BackgroundPaths'
 import { StarRating } from '@/components/ui/Icons'
 import type { Vehicle } from '@/data/vehicle-types'
 import { getVisibleVehicles } from '@/lib/vehicles'
-import { TEAM, GARAGE, waLink, phoneLink } from '@/data/contacts'
+import { TEAM, GARAGE, waLink, phoneLink, waVehicleLink, emailVehicleLink } from '@/data/contacts'
 import { TrustBand } from '@/components/ui/SectionDivider'
 import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
@@ -406,6 +406,8 @@ function VehiclesPreview({ vehicles }: { vehicles: Vehicle[] }) {
                 source={v.source}
                 images={vehicleImages}
                 imageSrc={v.image ?? undefined}
+                whatsappHref={waVehicleLink(v.make, v.model, v.year, v.km, v.price)}
+                emailHref={emailVehicleLink(v.make, v.model, v.year)}
                 badge={v.badge ? {
                   variant: v.badgeVariant,
                   dot: v.badgeVariant === 'success',

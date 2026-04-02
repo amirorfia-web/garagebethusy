@@ -137,6 +137,11 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
@@ -146,12 +151,6 @@ export default function RootLayout({
             gtag('config', '${GA_ID}');
           `}
         </Script>
-      </head>
-      <body className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        {/* WhatsApp sticky supprimé — les 3 contacts sont dans le footer et les CTAs */}
       </body>
     </html>
   )

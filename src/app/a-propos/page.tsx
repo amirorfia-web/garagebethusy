@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import StatStrip from '@/components/ui/StatStrip'
 import WhatsAppContact from '@/components/ui/WhatsAppContact'
-import { TEAM as TEAM_CONTACTS, waLink } from '@/data/contacts'
+import { GARAGE, TEAM as TEAM_CONTACTS, waLink } from '@/data/contacts'
 import { RevealSection, RevealLeft, RevealRight, StaggerGrid, StaggerCard } from '@/components/ui/AnimatedSections'
 
 export const metadata: Metadata = {
@@ -358,7 +358,7 @@ function GarageSection() {
         <RevealRight>
         <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-border">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.8!2d6.643!3d46.523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sAvenue+de+B%C3%A9thusy+27%2C+1005+Lausanne!5e0!3m2!1sfr!2sch!4v1700000000000"
+            src={GARAGE.mapsEmbed}
             width="100%"
             height="100%"
             style={{ border: 0, position: 'absolute', inset: 0 }}
